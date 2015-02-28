@@ -54,28 +54,28 @@ void muon_pretty_print(const char* ptr)
     unsigned depth = 0;
     while(true) {
         switch(*ptr) {
-        case (MUON_BLOB_BEG): {
+        case MUON_BLOB_BEG: {
             const int len = atoi(++ptr);
             ptr += strlen(ptr) + 1;
             printf("%*s [%i]:%s\n", depth*3, "", len, ptr);
             ptr += len;
         } break;
-        case (MUON_LIST_BEG):
+        case MUON_LIST_BEG:
             printf("%*s L(\n", depth*3, "");
             depth++;
             ptr++;
             break;
-        case (MUON_DICT_BEG):
+        case MUON_DICT_BEG:
             printf("%*s D(\n", depth*3, "");
             depth++;
             ptr++;
             break;
-        case (MUON_META_BEG):
+        case MUON_META_BEG:
             printf("%*s M(\n", depth*3, "");
             depth++;
             ptr++;
             break;
-        case (MUON_VAL_END):
+        case MUON_VAL_END:
             depth--;
             ptr++;
             printf("%*s )\n", depth*3, "");
@@ -98,6 +98,9 @@ int main()
             uKV("encoding", uSTR("UTF-8"))
         )
         uDICT(
+            uMETA(
+                uKV("meta of dict", uSTR("test"))
+            )
             uKV("abc", uVAL(123))
             uKV("def", uSTR("456"))
             uKV("map", uDICT(
