@@ -107,7 +107,7 @@ int main()
                 ))
             ))
             uKV("list", uLIST(
-                    "i0" uEND "i1" uEND "i2" uEND "i3" uEND
+                "i0" uEND "i1" uEND "i2" uEND "i3" uEND
             ))
             uKV("bin", uBLOB(uVAL(5), "\1\2\3\4\5"))
             uKV("last", uSTR("val"))
