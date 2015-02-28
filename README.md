@@ -26,6 +26,6 @@
 * Almost all data is stored in strings.
   * But keys and values are not quoted. They are zero-terminated instead.
   * So there's no need to escape "'&<>...
-* "Meta" type is similar to attributes in XML
+* "Meta" is similar to attribute set in XML
   * But it is equivalent to Dict, so can contain tree structures
 * 
