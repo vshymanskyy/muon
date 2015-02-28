@@ -93,10 +93,11 @@ int main()
 {
     // Compile-time construction
     const char uObj[] =
+        uMETA(
+            uKV("version", uSTR("1.0"))
+            uKV("encoding", uSTR("UTF-8"))
+        )
         uDICT(
-            uMETA(
-                uKV("encoding", uSTR("utf8"))
-            )
             uKV("abc", uVAL(123))
             uKV("def", uSTR("456"))
             uKV("map", uDICT(
@@ -113,7 +114,6 @@ int main()
             uKV("last", uSTR("val"))
         );
     
-    // For this object, size is 109
     printf("uObj sizeof: %lu\n", sizeof(uObj)-1);
     printf("uObj length: %lu\n", muon_length(uObj, sizeof(uObj)));
     
