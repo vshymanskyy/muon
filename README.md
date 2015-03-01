@@ -1,5 +1,6 @@
 # MUON
 µON is object notation format with some good properties for M2M communication.
+It is intended to be used in IoT applications, for example as payload in MQTT or as stand-alone communication protocol.
 
 µ[mju:] stands for "micro", like microcontroller is sometimes abbreviated "µC".
 
@@ -15,14 +16,15 @@ Composite:
 
 #### µON features:
 * Cross-platform
-* Easily parseable, even on microcontrollers (see the grammar below!)
-  * Actually you can just interpret it on-fly
+* Easy to parse and generate, even on microcontrollers (see the grammar below!)
+  * You can interpret/produce it on-fly
 * Uses control characters 0..4 as markers
 * Supports raw binary values
 * Supports UTF-8 string values
-* All strings are zero-terminated
 * Unlimited size of objects
-* Data can be used "in-place", no need to pre-parse data (but you can do this, of course)
+* Data is ready to be used "in-place" (for example, is not escaped/modified)
+  * All strings are already zero-terminated
+  * No need to pre-parse data (but you can do this, of course)
 * Mostly covers features of JSON and XML to minimize information loss during conversion to MUON
 
 #### µON compared to JSON and XML:
