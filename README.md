@@ -1,5 +1,6 @@
 # MUON
 µON is object notation format with some good properties for M2M communication.
+
 µ[mju:] stands for "micro", like microcontroller is sometimes abbreviated "µC".
 
 #### µON types
