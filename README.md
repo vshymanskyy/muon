@@ -2,16 +2,17 @@
 µON is object notation format with some good properties for M2M communication.
 µ[mju:] stands for "micro", like microcontroller is sometimes abbreviated "µC".
 
-µON primitive types:
+#### µON types
+Primitive:
 * String
-* Blob (binary)
+* Binary
 
-µON composite types:
+Composite:
 * List (sequence of elements)
 * Dict (associative container of key-value pairs)
 * Meta (a Dict that contains meta-information )
 
-µON features:
+#### µON features:
 * Easily parseable, even on microcontrollers
   * Actually you can just interpret it on-fly
 * Supports binary values
@@ -20,7 +21,7 @@
 * Data can be used "in-place"
 * Any JSON or XML document should be convertable to MUON without information/structure loss
 
-µON compared to JSON and XML:
+#### µON compared to JSON and XML:
 * µON is binary format (so not human-readable)
   * But can easily be transformed into a readable form
 * Almost all data is stored in strings.
@@ -29,3 +30,14 @@
 * "Meta" is similar to attribute set in XML
   * But it is equivalent to Dict, so can contain tree structures
 * 
+
+#### µON grammar
+
+    object ::= ( '\4' (string '\0' object)+ '\0' )?  /* optional meta-information */
+               ( string '\0'                         /* string */
+               | '\1' digits '\0' raw-data           /* binary */
+               | '\2' object* '\0'                   /* list */
+               | '\3' (string '\0' object)* '\0'     /* dict */
+               )
+    string ::= any-utf8-except-control*
+
