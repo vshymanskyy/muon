@@ -14,12 +14,14 @@ Composite:
 * Meta (a Dict that contains meta-information )
 
 #### µON features:
+* Cross-platform
 * Easily parseable, even on microcontrollers
   * Actually you can just interpret it on-fly
 * Supports binary values
 * Supports UTF-8 string values
+* All strings are zero-terminated
 * Unlimited size of objects
-* Data can be used "in-place"
+* Data can be used "in-place", no need to pre-parse data (but you can do this, of course)
 * Any JSON or XML document should be convertable to MUON without information/structure loss
 
 #### µON compared to JSON and XML:
@@ -30,7 +32,6 @@ Composite:
   * So there's no need to escape "'&<>...
 * "Meta" is similar to attribute set in XML
   * But it is equivalent to Dict, so can contain tree structures
-* 
 
 #### µON grammar
 
