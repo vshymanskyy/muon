@@ -15,20 +15,21 @@ Composite:
 
 #### µON features:
 * Cross-platform
-* Easily parseable, even on microcontrollers
+* Easily parseable, even on microcontrollers (see the grammar below!)
   * Actually you can just interpret it on-fly
-* Supports binary values
+* Uses control characters 0..4 as markers
+* Supports raw binary values
 * Supports UTF-8 string values
 * All strings are zero-terminated
 * Unlimited size of objects
 * Data can be used "in-place", no need to pre-parse data (but you can do this, of course)
-* Any JSON or XML document should be convertable to MUON without information/structure loss
+* Mostly covers features of JSON and XML to minimize information loss during conversion to MUON
 
 #### µON compared to JSON and XML:
 * µON is binary format (so not human-readable)
   * But can easily be transformed into a readable form
-* Almost all data is stored in strings.
-  * But keys and values are not quoted. They are zero-terminated instead.
+* Almost all values are stored as strings
+  * But keys and values are not quoted. They are zero-terminated instead
   * So there's no need to escape "'&<>...
 * "Meta" is similar to attribute set in XML
   * But it is equivalent to Dict, so can contain tree structures
