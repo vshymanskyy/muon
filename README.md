@@ -42,5 +42,3 @@ Composite:
                )
     string ::= any-utf8-except-control*
 
-![alt tag](docs/object.png?raw=true)
-
