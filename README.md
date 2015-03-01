@@ -28,6 +28,7 @@ Composite:
 * Mostly covers features of JSON and XML to minimize information loss during conversion to MUON
 
 #### µON compared to JSON and XML:
+* µON is more compact than JSON (approx. 25%, depends on the object)
 * µON is binary format (so not human-readable)
   * But can easily be transformed into a readable form
 * Almost all values are stored as strings
@@ -47,3 +48,7 @@ Composite:
     string ::= any-utf8-except-control*
 
 ![alt tag](docs/object.png?raw=true)
+
+#### TODO
+* Handle special values
+  * true, false, null
