@@ -39,12 +39,11 @@ Composite:
   * But it is equivalent to Dict, so can contain tree structures
 
 #### µON grammar
-
 This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 
     object ::= ( '\5' object )?                      /* optional meta-information */
                ( string '\0'                         /* string */
-               | '\1' digits '\0' raw-data           /* binary */
+               | '\1' length raw-data                /* binary */
                | '\2' (                              /* special */
                         '1'                             /* true */
                       | '0'                             /* false */
@@ -53,7 +52,10 @@ This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
                | '\3' object* '\0'                   /* list */
                | '\4' (string '\0' object)* '\0'     /* dict */
                )
+    
     string ::= any-utf8-except-control*
+    length ::= (#x80-#xFF)* (#x00-#x7F)
+
 
 ![alt tag](docs/object.png?raw=true)
 
