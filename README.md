@@ -38,7 +38,7 @@ Composite:
   * But keys and values are not quoted. They are zero-terminated instead
   * So there's no need to escape "'&<>...
 * "Meta" is similar to attribute set in XML
-  * But it is equivalent to Dict, so can contain tree structures
+  * But it can be any object, so can contain tree structures
 
 #### µON grammar
 This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
