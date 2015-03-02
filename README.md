@@ -19,7 +19,7 @@ Composite:
 * Cross-platform
 * Easy to parse and generate, even on microcontrollers (see the grammar below!)
   * You can interpret/produce it on-fly
-* Uses control characters 0..4 as markers
+* Uses control characters 0..5 as markers
 * Supports raw binary values
 * Supports UTF-8 string values
 * Unlimited size of objects
