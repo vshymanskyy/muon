@@ -1,8 +1,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
-// Defines for compile-time constructiion
+// Defines for compile-time construction
 #define uEND         "\0"
 #define uTRUE        "\02" "1"
 #define uFALSE       "\02" "0"
@@ -24,41 +25,13 @@
 #define MUON_DICT_BEG '\04'
 #define MUON_META_BEG '\05'
 
-size_t muon_length(const char* beg, size_t len)
+size_t muon_pretty_print(const char* beg, size_t max_len)
 {
     unsigned depth = 0;
-    const char *ptr = beg, *end = beg+len;
+    const char *ptr = beg, *end = beg+max_len;
     while (ptr < end) {
-        switch(*ptr) {
-        case MUON_BLOB_BEG: {
-            const long l = atol(++ptr);
-            ptr += strlen(ptr) + 1;
-            ptr += l;
-        }    break;
-        case MUON_LIST_BEG:
-        case MUON_DICT_BEG:
-        case MUON_META_BEG:
-            depth++;
-            ptr++;
-            break;
-        case MUON_VAL_END:
-            depth--;
-            ptr++;
-            break;
-        default:
-            ptr += strlen(ptr) + 1;
-        }
-        if (!depth)
-            return ptr-beg;
-    }
-    return len;
-}
-
-void muon_pretty_print(const char* ptr)
-{
-    unsigned depth = 0;
-    while (1) {
-        switch(*ptr) {
+    	const char ch = *ptr;
+        switch(ch) {
         case MUON_BLOB_BEG: {
             const int len = atoi(++ptr);
             ptr += strlen(ptr) + 1;
@@ -76,9 +49,8 @@ void muon_pretty_print(const char* ptr)
             ptr++;
             break;
         case MUON_META_BEG:
-            printf("%*s M(\n", depth*3, "");
-            depth++;
-            ptr++;
+            printf("[meta]");
+            ptr += muon_pretty_print(ptr+1, end-ptr)+1;
             break;
         case MUON_VAL_END:
             depth--;
@@ -89,43 +61,86 @@ void muon_pretty_print(const char* ptr)
             printf("%*s %s\n", depth*3, "", ptr);
             ptr += strlen(ptr) + 1;
         }
-        if (!depth)
-            return;
+        if (!depth && ch != MUON_META_BEG)
+            return ptr-beg;
     }
+    return max_len;
 }
+
+
+
+
+// Compile-time construction
+static const char uObj[] =
+    uMETA(uDICT(
+        uKV("encoding", uSTR("UTF-8"))
+    ))
+    uDICT(
+        uKV("abc", uVAL(123))
+        uKV("def", uSTR("456"))
+        uKV("map", uDICT(
+            uKV("k1", uSTR("v1"))
+            uKV("k2", uSTR("v2"))
+            uKV("k3", uLIST(
+                "i0" uEND "i1" uEND "i2" uEND "i3" uEND
+            ))
+        ))
+        uKV("list", uLIST(
+            "i0" uEND "i1" uEND "i2" uEND "i3" uEND
+        ))
+    );
+
+/*
+ * This produces 90 bytes:
+ *
+ *   "\05"
+ *   	"\04"
+ *   		"encoding" "\0" "UTF-8" "\0"
+ *   	"\00"
+ *   "\04"
+ *   	"abc" "\0" "123" "\0"
+ *   	"def" "\0" "456" "\0"
+ *   	"map" "\0" "\04"
+ *   		"k1" "\0" "v1" "\0"
+ *   		"k2" "\0" "v2" "\0"
+ *   		"k3" "\0" "\03"
+ *   			"i0" "\0" "i1" "\0" "i2" "\0" "i3" "\0"
+ *   		"\00"
+ *   	"\00"
+ *   	"list" "\0" "\03"
+ *   		"i0" "\0" "i1" "\0" "i2" "\0" "i3" "\0"
+ *   	"\00"
+ *   "\00"
+ *
+ * Which can be interpreted as:
+ *
+ *   META-DICT(
+ *   	encoding, UTF-8,
+ *   )
+ *   DICT(
+ *   	abc, 123,
+ *   	def, 456,
+ *   	map, DICT(
+ *   		k1, v1,
+ *   		k2, v2,
+ *   		k3, LIST(
+ *   			i0, i1, i2, i3,
+ *   		)
+ *   	)
+ *   	list, LIST(
+ *   		i0, i1, i2, i3,
+ *   	)
+ *   )
+ *
+ */
 
 int main()
 {
-    // Compile-time construction
-    const char uObj[] =
-        uMETA(uDICT(
-            uKV("version", uSTR("1.0"))
-            uKV("encoding", uSTR("UTF-8"))
-        ))
-        uDICT(
-            uMETA(
-                uKV("meta of dict", uSTR("test"))
-            )
-            uKV("abc", uVAL(123))
-            uKV("def", uSTR("456"))
-            uKV("map", uDICT(
-                uKV("k1", uSTR("v1"))
-                uKV("k2", uSTR("v2"))
-                uKV("k3", uLIST(
-                    "i0" uEND "i1" uEND "i2" uEND "i3" uEND
-                ))
-            ))
-            uKV("list", uLIST(
-                "i0" uEND "i1" uEND "i2" uEND "i3" uEND
-            ))
-            uKV("bin", uBLOB(uVAL(5), "\1\2\3\4\5"))
-            uKV("last", uSTR("val"))
-        );
-    
-    printf("uObj sizeof: %lu\n", sizeof(uObj)-1);
-    printf("uObj length: %lu\n", muon_length(uObj, sizeof(uObj)));
-    
-    muon_pretty_print(uObj);
-  
+    size_t len = muon_pretty_print(uObj, sizeof(uObj));
+
+    assert(len == sizeof(uObj)-1);
+
+    printf("uObj length: %lu\n", len);
+
     return 0;
 }
