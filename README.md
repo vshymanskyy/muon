@@ -56,6 +56,7 @@ This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
     string ::= any-utf8-except-control*
     length ::= [#x80-#xFF]* [#x00-#x7F]
 
+Length of binary is encoded like in MQTT: each byte encodes 128 values and a "continuation bit". The last byte of length has most significant bit set to 0.
 
 ![alt tag](docs/object.png?raw=true)
 
