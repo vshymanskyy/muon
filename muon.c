@@ -3,27 +3,32 @@
 #include <stdio.h>
 
 // Defines for compile-time constructiion
-#define STRINGIFY(x) #x
 #define uEND         "\0"
+#define uTRUE        "\02" "1"
+#define uFALSE       "\02" "0"
+#define uNULL        "\02" "0"
+#define STRINGIFY(x) #x
 #define uVAL(v)      uSTR(STRINGIFY(v)) // Utility to stringify constants
 #define uSTR(s)      s uEND             // Every value is null-terminated
 #define uKV(k,v)     uSTR(k) v          // Key-value pairs are just pairs
-#define uLIST(items) "\01" items "\00"  // LIST: 1 and 0 are like [ and ]
-#define uDICT(items) "\02" items "\00"  // DICT: 2 and 0 are like { and }
-#define uMETA(items) "\03" items "\00"  // ATTR: dict of attributes
-#define uBLOB(s, b)  "\04" s b          // Binary is prefixed with length
+#define uBLOB(s, b)  "\01" s b          // Binary is prefixed with length
+#define uLIST(items) "\03" items "\00"  // LIST: 3 and 0 are like [ and ]
+#define uDICT(items) "\04" items "\00"  // DICT: 4 and 0 are like { and }
+#define uMETA(obj)   "\05" obj          // META: prefixed metainformation
 
 // Defines for run-time handling
 #define MUON_VAL_END  '\00'
-#define MUON_LIST_BEG '\01'
-#define MUON_DICT_BEG '\02'
-#define MUON_META_BEG '\03'
-#define MUON_BLOB_BEG '\04'
+#define MUON_BLOB_BEG '\01'
+#define MUON_SPEC_BEG '\02'
+#define MUON_LIST_BEG '\03'
+#define MUON_DICT_BEG '\04'
+#define MUON_META_BEG '\05'
 
 size_t muon_length(const char* beg, size_t len)
 {
     unsigned depth = 0;
-    for (const char *ptr = beg, *end = beg+len; ptr < end; ) {
+    const char *ptr = beg, *end = beg+len;
+    while (ptr < end) {
         switch(*ptr) {
         case MUON_BLOB_BEG: {
             const long l = atol(++ptr);
@@ -52,7 +57,7 @@ size_t muon_length(const char* beg, size_t len)
 void muon_pretty_print(const char* ptr)
 {
     unsigned depth = 0;
-    while(true) {
+    while (1) {
         switch(*ptr) {
         case MUON_BLOB_BEG: {
             const int len = atoi(++ptr);
@@ -93,10 +98,10 @@ int main()
 {
     // Compile-time construction
     const char uObj[] =
-        uMETA(
+        uMETA(uDICT(
             uKV("version", uSTR("1.0"))
             uKV("encoding", uSTR("UTF-8"))
-        )
+        ))
         uDICT(
             uMETA(
                 uKV("meta of dict", uSTR("test"))
