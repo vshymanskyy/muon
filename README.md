@@ -4,7 +4,7 @@ It is intended to be used in IoT applications, for example as payload in MQTT or
 
 µ[mju:] stands for "micro", like microcontroller is sometimes abbreviated "µC".
 
-**Attention! This project is on an early stage of developpment, and generally should be treated as RFC  (Request for comments). If you have any ideas/comments, you can post them [here](https://github.com/vshymanskyy/MUON/issues/1)**
+*Attention! This project is on an early stage of developpment, and generally should be treated as RFC  (Request for comments). If you have any ideas/comments, you can post them [here](https://github.com/vshymanskyy/MUON/issues/1)*
 
 #### µON types
 Primitive:
