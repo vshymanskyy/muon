@@ -8,6 +8,7 @@ It is intended to be used in IoT applications, for example as payload in MQTT or
 Primitive:
 * String
 * Binary
+* Special (true, false, null)
 
 Composite:
 * List (sequence of elements)
@@ -39,16 +40,18 @@ Composite:
 
 #### µON grammar
 
-    object ::= ( '\4' (string '\0' object)+ '\0' )?  /* optional meta-information */
+    object ::= ( '\5' (string '\0' object)+ '\0' )?  /* optional meta-information */
                ( string '\0'                         /* string */
                | '\1' digits '\0' raw-data           /* binary */
-               | '\2' object* '\0'                   /* list */
-               | '\3' (string '\0' object)* '\0'     /* dict */
+               | '\2' (                              /* special */
+                        '1'                             /* true */
+                      | '0'                             /* false */
+                      | '-'                             /* null */
+                      )
+               | '\3' object* '\0'                   /* list */
+               | '\4' (string '\0' object)* '\0'     /* dict */
                )
     string ::= any-utf8-except-control*
 
 ![alt tag](docs/object.png?raw=true)
 
-#### TODO
-* Handle special values
-  * true, false, null
