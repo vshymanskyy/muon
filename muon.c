@@ -7,7 +7,7 @@
 #define uEND         "\0"
 #define uTRUE        "\02" "1"
 #define uFALSE       "\02" "0"
-#define uNULL        "\02" "0"
+#define uNULL        "\02" "-"
 #define STRINGIFY(x) #x
 #define uVAL(v)      uSTR(STRINGIFY(v)) // Utility to stringify constants
 #define uSTR(s)      s uEND             // Every value is null-terminated
