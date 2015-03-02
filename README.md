@@ -15,7 +15,7 @@ Primitive:
 Composite:
 * List (sequence of elements)
 * Dict (associative container of key-value pairs)
-* Meta (a Dict that contains meta-information )
+* Meta (an object that contains meta-information)
 
 #### µON features:
 * Cross-platform
