@@ -42,7 +42,7 @@ Composite:
 
 This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 
-    object ::= ( '\5' (string '\0' object)+ '\0' )?  /* optional meta-information */
+    object ::= ( '\5' object )?                      /* optional meta-information */
                ( string '\0'                         /* string */
                | '\1' digits '\0' raw-data           /* binary */
                | '\2' (                              /* special */
