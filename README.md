@@ -54,7 +54,7 @@ This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
                )
     
     string ::= any-utf8-except-control*
-    length ::= (#x80-#xFF)* (#x00-#x7F)
+    length ::= [#x80-#xFF]* [#x00-#x7F]
 
 
 ![alt tag](docs/object.png?raw=true)
