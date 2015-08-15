@@ -44,9 +44,9 @@ Composite:
 This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 
 ```
-object ::= ( #x13 pair* #x10 ) ?                 /* meta */
-           ( string #x00                         /* text */
-           | #x01 length raw-data                /* blob */
+object ::= ( #x13 object ) ?                     /* meta */
+           ( any-utf8-except-control* #x00       /* text */
+           | #x01 [0-9]* #x00 raw-data           /* blob */
            | #x02 (                              /* special */
                     'T'                             /* true */
                   | 'F'                             /* false */
@@ -54,12 +54,8 @@ object ::= ( #x13 pair* #x10 ) ?                 /* meta */
                   | '?'                             /* undef */
                   )
            | #x11 object* #x10                   /* list */
-           | #x12 pair*   #x10                   /* dict */
+           | #x12 (any-utf8 #x00 object)* #x10   /* dict */
            )
-
-pair   ::= (string #x00 object)
-string ::= any-utf8-except-control*
-length ::= [0-9]*
 ```
 
 ![alt tag](docs/object.png?raw=true)
