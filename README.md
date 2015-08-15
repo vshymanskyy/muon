@@ -47,14 +47,14 @@ This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 object ::= ( '\20' object )?                     /* meta */
            ( string '\0'                         /* text */
            | '\1' length raw-data                /* blob */
-           | '\2' number                         /* +num */
-           | '\3' number                         /* -num */
-           | '\4' (                              /* special */
+           | '\2' (                              /* special */
                     'T'                             /* true */
                   | 'F'                             /* false */
                   | 'X'                             /* null */
                   | '?'                             /* undef */
                   )
+           | '\3' number                         /* +num */
+           | '\4' number                         /* -num */
            | '\17' object* '\18'                 /* list */
            | '\19' (string '\0' object)*         /* dict */
            )
