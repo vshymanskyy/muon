@@ -44,27 +44,23 @@ Composite:
 This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 
 ```
-object ::= ( '\20' object )?                     /* meta */
-           ( string '\0'                         /* text */
-           | '\1' length raw-data                /* blob */
-           | '\2' (                              /* special */
+object ::= ( #x13 pair* #x10 ) ?                 /* meta */
+           ( string #x00                         /* text */
+           | #x01 length raw-data                /* blob */
+           | #x02 (                              /* special */
                     'T'                             /* true */
                   | 'F'                             /* false */
                   | 'X'                             /* null */
                   | '?'                             /* undef */
                   )
-           | '\3' number                         /* +num */
-           | '\4' number                         /* -num */
-           | '\17' object* '\18'                 /* list */
-           | '\19' (string '\0' object)*         /* dict */
+           | #x11 object* #x10                   /* list */
+           | #x12 pair*   #x10                   /* dict */
            )
 
+pair   ::= (string #x00 object)
 string ::= any-utf8-except-control*
-length ::= number
-number ::= [#x80-#xFF]* [#x00-#x7F]
+length ::= [0-9]*
 ```
-
-Length of binary is encoded like in MQTT: each byte encodes 128 values and a "continuation bit". The last byte of length has most significant bit set to 0.
 
 ![alt tag](docs/object.png?raw=true)
 
