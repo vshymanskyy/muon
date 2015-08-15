@@ -43,20 +43,26 @@ Composite:
 #### µON grammar
 This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 
-    object ::= ( '\5' object )?                      /* optional meta-information */
-               ( string '\0'                         /* string */
-               | '\1' length raw-data                /* binary */
-               | '\2' (                              /* special */
-                        '1'                             /* true */
-                      | '0'                             /* false */
-                      | '-'                             /* null */
-                      )
-               | '\3' object* '\0'                   /* list */
-               | '\4' (string '\0' object)* '\0'     /* dict */
-               )
-    
-    string ::= any-utf8-except-control*
-    length ::= [#x80-#xFF]* [#x00-#x7F]
+```
+object ::= ( '\20' object )?                     /* meta */
+           ( string '\0'                         /* text */
+           | '\1' length raw-data                /* blob */
+           | '\2' number                         /* +num */
+           | '\3' number                         /* -num */
+           | '\4' (                              /* special */
+                    'T'                             /* true */
+                  | 'F'                             /* false */
+                  | 'X'                             /* null */
+                  | '?'                             /* undef */
+                  )
+           | '\17' object* '\18'                 /* list */
+           | '\19' (string '\0' object)*         /* dict */
+           )
+
+string ::= any-utf8-except-control*
+length ::= number
+number ::= [#x80-#xFF]* [#x00-#x7F]
+```
 
 Length of binary is encoded like in MQTT: each byte encodes 128 values and a "continuation bit". The last byte of length has most significant bit set to 0.
 
