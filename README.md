@@ -10,7 +10,7 @@ It is intended to be used in IoT applications, for example as payload in MQTT or
 Primitive:
 * String
 * Binary
-* Special (true, false, null)
+* Special (true, false, null, undef)
 
 Composite:
 * List (sequence of elements)
@@ -21,30 +21,30 @@ Composite:
 * Cross-platform
 * Easy to parse and generate, even on microcontrollers (see the grammar below!)
   * You can interpret/produce it on-fly
-* Uses [control characters](http://en.wikipedia.org/wiki/Control_character) 0..5 as markers
+* Uses [control characters](http://en.wikipedia.org/wiki/Control_character) 0x00,0x01,0x02,0x03,0x04,0x05,0x0A as markers
 * Supports raw binary values
 * Supports UTF-8 string values
-* Unlimited size of objects
+* Virtually unlimited size of objects and values
 * Data is ready to be used "in-place" (for example, is not escaped/modified)
   * All strings are already zero-terminated
-  * No need to pre-parse data (but you can do this, of course)
+  * No need to pre-parse data (you can do this, of course)
 * Mostly covers features of JSON and XML to minimize information loss during conversion to MUON
 
 #### µON compared to JSON and XML:
 * µON is more compact than JSON (approx. 25%, depends on the object)
 * µON is binary format (so not human-readable)
-  * But can easily be transformed into a readable form
+  * Can easily be transformed into a readable form
 * Almost all values are stored as strings
-  * But keys and values are not quoted. They are zero-terminated instead
-  * So there's no need to escape "'&<>...
+  * Keys and values are not quoted, they are zero-terminated instead
+  * There's no need to escape "'&<>...
 * "Meta" is similar to attribute set in XML
-  * But it can be any object, so can contain tree structures
+  * It can be any object (contain tree structures)
 
 #### µON grammar
 This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 
 ```
-object ::= ( #x13 object ) ?                     /* meta */
+object ::= ( #x05 object ) ?                     /* meta */
            ( any-utf8-except-control* #x00       /* text */
            | #x01 [0-9]* #x00 raw-data           /* blob */
            | #x02 (                              /* special */
@@ -53,8 +53,8 @@ object ::= ( #x13 object ) ?                     /* meta */
                   | 'X'                             /* null */
                   | '?'                             /* undef */
                   )
-           | #x11 object* #x10                   /* list */
-           | #x12 (any-utf8 #x00 object)* #x10   /* dict */
+           | #x03 object* #x0A                   /* list */
+           | #x04 (any-utf8 #x00 object)* #x0A   /* dict */
            )
 ```
 
