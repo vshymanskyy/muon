@@ -46,7 +46,7 @@ This grammar can be visualized using http://www.bottlecaps.de/rr/ui :
 ```
 object ::= ( #x05 object ) ?                     /* meta */
            ( any-utf8-except-control* #x00       /* text */
-           | #x01 [0-9]* #x00 raw-data           /* blob */
+           | #x01 [0-9]+ #x00 raw-data           /* blob */
            | #x02 (                              /* special */
                     'T'                             /* true */
                   | 'F'                             /* false */
