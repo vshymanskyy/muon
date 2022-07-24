@@ -1,9 +1,9 @@
 # muon
-A compact and **simple** object notation. µ[mju:] stands for "micro". See [**presentation**](https://docs.google.com/presentation/d/1MosK6LTy_Rr32eF6HKej6UEtf9vBzdbeSF6YPb1_e4A/present) for more details.
+A compact and **simple** object notation. µ[mju:] stands for "micro".
 
 **If you have any ideas please feel free to [post them here](https://github.com/vshymanskyy/muon/issues).**
 
-Muon has some interesting  properties:
+Muon has some interesting  properties (see [**presentation**](https://docs.google.com/presentation/d/1MosK6LTy_Rr32eF6HKej6UEtf9vBzdbeSF6YPb1_e4A/present) for more details):
 - Every `UTF8` string is a valid `muon` object
 - Uses gaps in the `UTF8` encoding space to encode things like `[` `]` `{` `}` etc.
 - More compact than `JSON` (approx. 25%, depends on the object). On par/outperforms `CBOR`, `MsgPack`, `UBJSON`
@@ -11,7 +11,6 @@ Muon has some interesting  properties:
 - Data is ready to be used in-place without pre-processing
 - Supports raw binary values and typed arrays
 - Mostly covers features of JSON and XML to minimize information loss during conversion to MUON
-- See [**presentation**](https://docs.google.com/presentation/d/1MosK6LTy_Rr32eF6HKej6UEtf9vBzdbeSF6YPb1_e4A/present) for more details
 
 Future goals:
 - Well-specified (little or no room for implementation-specific behavior / vendor-specific extensions)
@@ -28,8 +27,7 @@ Primitive:
 * Special: `True`, `False`, `Null`, `NaN`, `-Inf`, `+Inf`
 
 Composite:
-* TypedArray
-* List (sequence of elements)
+* TypedArray (a bunch of elements of the same type, possibly chunked)
+* List (sequence of arbitrary elements)
 * Dictionary (associative container of key-value pairs)
-* Attribute (an object that contains meta-information)
-
+* Attribute (an dictionary that contains meta-information)
