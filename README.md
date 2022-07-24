@@ -3,7 +3,7 @@ A compact and **simple** object notation. µ[mju:] stands for "micro".
 
 ---
 
-Muon has some interesting  properties (see [**presentation**](https://docs.google.com/presentation/d/1MosK6LTy_Rr32eF6HKej6UEtf9vBzdbeSF6YPb1_e4A/present) for more details):
+Muon has some interesting  properties (see [**presentation**](https://bit.ly/muon-present) for more details):
 - Every `UTF8` string is a valid `muon` object
 - Uses gaps in the `UTF8` encoding space to encode things like `[` `]` `{` `}` etc.
 - More compact than `JSON` (approx. 25%, depends on the object). On par/outperforms `CBOR`, `MsgPack`, `UBJSON`
@@ -17,7 +17,7 @@ Future goals:
 
 ## Muon structure
 
-![alt tag](docs/muon.png?raw=true)
+[![alt tag](docs/muon.png?raw=true)](https://bit.ly/muon-present)
 
 ## Muon types
 
