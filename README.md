@@ -24,7 +24,6 @@ Future goals:
 
 Primitive:
 * String
-* Integer
 * Typed (integers and floats)
 * Special: `True`, `False`, `Null`, `NaN`, `-Inf`, `+Inf`
 
