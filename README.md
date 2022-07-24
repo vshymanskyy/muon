@@ -1,7 +1,7 @@
 # muon
 A compact and **simple** object notation. µ[mju:] stands for "micro". See [**presentation**](https://docs.google.com/presentation/d/1MosK6LTy_Rr32eF6HKej6UEtf9vBzdbeSF6YPb1_e4A/present) for more details.
 
-**If you have any ideas/comments, please feel free to [post them here](https://github.com/vshymanskyy/muon/issues).**
+**If you have any ideas please feel free to [post them here](https://github.com/vshymanskyy/muon/issues).**
 
 Muon has some interesting  properties:
 - Every `UTF8` string is a valid `muon` object
@@ -15,6 +15,8 @@ Muon has some interesting  properties:
 
 Future goals:
 - Well-specified (little or no room for implementation-specific behavior / vendor-specific extensions)
+
+## Muon structure
 
 ![alt tag](docs/muon.png?raw=true)
 
