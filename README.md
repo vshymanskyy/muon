@@ -16,6 +16,7 @@ Muon has some interesting  properties (see [**presentation**](https://bit.ly/muo
 - Data is ready to be used in-place without pre-processing
 - Supports raw binary values and typed arrays
 - Mostly covers features of JSON and XML to minimize information loss during conversion to MUON
+- Can (optionally) contain info abou count of values/size in bytes for all structures, for efficient document scanning
 
 Future goals:
 - Well-specified (little or no room for implementation-specific behavior / vendor-specific extensions)
