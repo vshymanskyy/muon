@@ -4,6 +4,7 @@ A compact and **simple** object notation. µ[mju:] stands for "micro".
 ```log
 File extension:   .mu
 MIME type:        application/muon
+Endianness:       little-endian
 ```
 ---
 
