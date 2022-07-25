@@ -9,12 +9,11 @@ Endianness:       little-endian
 
 Muon has some interesting  properties (see [**presentation**](https://bit.ly/muon-present) for more details):
 - Every `UTF8` string is a valid `muon` object
-- Uses gaps in the `UTF8` encoding space to encode things like `[` `]` `{` `}` etc.
-- More compact than `JSON` (approx. 25%, depends on the object). On par or outperforms `CBOR`, `MsgPack`, `UBJSON`
+- Gaps in the `UTF8` encoding space are used to encode things like `[` `]` `{` `}` etc.
+- More compact than `JSON` (~25% smaller). On par or outperforms `CBOR`, `MsgPack`, `UBJSON`
 - Unlimited size of objects and values
 - Data is ready to be used in-place without pre-processing
 - Supports raw binary values and typed arrays
-- Mostly covers features of JSON and XML to minimize information loss during conversion to MUON
 - Optionally, can contain count of elements (and size in bytes) of all structures for efficient document processing
 
 Future goals:
