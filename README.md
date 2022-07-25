@@ -40,3 +40,5 @@ Future goals:
 
 **Disclaimer:** the notation is still Work In Progress.  
 If you have any ideas or comments, please feel free to [post them here](https://github.com/vshymanskyy/muon/issues).
+
+[![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct-single.svg)](https://stand-with-ukraine.pp.ua)
