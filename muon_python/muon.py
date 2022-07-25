@@ -69,18 +69,16 @@ class Writer:
         self.detect_binary = False
         self.detect_numstr = True
 
-        if mark or len(table):
-            self.start_attr()
-            self.add('u')
-            self.add(1)
-            if len(table):
-                self.add('t')
-                self.start_list()
-                for idx, s in enumerate(table):
-                    self.add_str(s)
-                    self.st[s] = idx
-                self.end_list()
-            self.end_attr()
+        if mark:
+            self.out.write(b'\x8F\xCE\xBC\x31')
+
+        if len(table):
+            self.add(b'\x8C')
+            self.start_list()
+            for idx, s in enumerate(table):
+                self.add_str(s)
+                self.st[s] = idx
+            self.end_list()
 
     def add(self, val):
         if isinstance(val, str):
