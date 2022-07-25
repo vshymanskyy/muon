@@ -38,3 +38,7 @@ It also has a 3-byte payload, so the complete tag looks like `8F CE BC 01`.
 - `01` is Muon version (currently always 1)
 
 Should only appear at the beginning of file/stream once.
+
+#### `0xFF` Padding
+
+Can be used to align the following value in memory, or as stream keep-alive signal.
