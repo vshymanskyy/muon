@@ -34,10 +34,8 @@ class Writer:
             self.out.write(b'\x93')
 
 if __name__ == '__main__':
-    import sys, io, json
+    import sys, json
     with open(sys.argv[1]) as f:
         data = json.load(f)
-    muon = Writer(io.BytesIO())
+    muon = Writer(sys.stdout.buffer)
     muon.add(data)
-    sys.stdout.buffer.write(muon.out.getvalue())
-
