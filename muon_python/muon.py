@@ -5,7 +5,7 @@ import array
 
 import leb128, struct
 from collections.abc import Mapping, Sequence
-from collections import Counter
+from collections import deque, Counter
 
 class DictBuilder:
     def __init__(self):
@@ -16,10 +16,10 @@ class DictBuilder:
             pass
         elif isinstance(val, str):
             self.add_str(val)
-        elif isinstance(val, list):
+        elif isinstance(val, Sequence):
             for v in val:
                 self.add(v)
-        elif isinstance(val, dict):
+        elif isinstance(val, Mapping):
             for k, v in val.items():
                 self.add_str(k)
                 self.add(v)
@@ -32,8 +32,8 @@ class DictBuilder:
         for k, v in self._count.items():
             self._count[k] = (v-1) * len(k)
 
-        res = filter(lambda x: x[1] > 6, self._count.most_common(size))
-        return list(map(lambda x: x[0], res))
+        res = filter(lambda x: x[1] >= 6, self._count.most_common())
+        return list(map(lambda x: x[0], res))[0:size]
 
 def detect_array_type(arr):
     if len(arr) < 3:
@@ -61,24 +61,26 @@ def optimize_json(data):
     return data
 
 class Writer:
-    def __init__(self, out, table=[], mark=False):
+    def __init__(self, out):
         self.out = out
-        self.st = {}
+        self.lru = deque(maxlen=512)
 
         self.detect_arrays = True
         self.detect_binary = False
-        self.detect_numstr = True
+        self.detect_numstr = False
 
-        if mark:
-            self.out.write(b'\x8F\xCE\xBC\x31')
+    def tag_muon(self):
+        self.out.write(b'\x8F\xCE\xBC\x31')
 
-        if len(table):
-            self.add(b'\x8C')
-            self.start_list()
-            for idx, s in enumerate(table):
-                self.add_str(s)
-                self.st[s] = idx
-            self.end_list()
+    def add_lru_list(self, table):
+        table = list(table)
+        self.lru.extend(table)
+
+        self.out.write(b'\x8C')
+        self.start_list()
+        for s in table:
+            self.out.write(s.encode('utf8') + b'\x00')
+        self.end_list()
 
     def add(self, val):
         if isinstance(val, str):
@@ -113,7 +115,7 @@ class Writer:
 
             self.out.write(b'\xBA' + struct.pack('<d', val))
         elif isinstance(val, array.array):
-            pass # TODO
+            raise Exception("TODO: TypedArrays")
         elif isinstance(val, Sequence):
             t = None
             if self.detect_arrays:
@@ -157,21 +159,23 @@ class Writer:
     """
 
     def add_str(self, val):
+        val = str(val)
         strlen = len(val)
 
-        if self.detect_numstr and not val.startswith('0'):
-            try:
-                self.add(int(val))
-                return
-            except:
-                pass
+        if self.detect_numstr:
+            if not val.startswith('0'):
+                try:
+                    self.add(int(val))
+                    return
+                except:
+                    pass
 
-        if self.detect_numstr and strlen > 8:
-            try:
-                self.add(float(val))
-                return
-            except:
-                pass
+            if strlen > 8:
+                try:
+                    self.add(float(val))
+                    return
+                except:
+                    pass
 
 
         if self.detect_binary and not bool(re.search('\s', val)):
@@ -198,11 +202,12 @@ class Writer:
                 self.out.write(b'\x00')
                 return
 
-        if val in self.st:
-            idx = self.st[val]
+        if val in self.lru:
+            idx = len(self.lru) - self.lru.index(val) - 1
+            #print (f"Found {val} at LRU {idx}")
             self.out.write(b'\x81' + leb128.u.encode(idx))
         else:
-            self.out.write(str(val).encode('utf8') + b'\x00')
+            self.out.write(val.encode('utf8') + b'\x00')
 
     def add_binary(self, val):
         self.out.write(b'\x84\xB4')
@@ -219,6 +224,7 @@ class Writer:
 
 class Reader:
     def __init__(self, inp):
+        self.lru = deque()
         if isinstance(inp, io.BufferedReader):
             self.inp = inp
         else:
@@ -230,7 +236,8 @@ class Reader:
     def read_string(self):
         c = self.inp.read(1)
         if c == b'\x81':
-            raise Exception("TODO: String refs")
+            n, l = leb128.u.decode_reader(self.inp)
+            return self.lru[-1-n]
         else:
             # read until 0
             buff = b''
@@ -291,18 +298,22 @@ class Reader:
         return res
 
     def read_typed_array(self):
-        raise Exception("TODO: Typed arrays")
+        raise Exception("TODO: TypedArrays")
 
     def read_object(self):
         nxt = self.peek_byte()
 
-        if nxt >= 0x80 and nxt <= 0xC1:
+        if nxt > 0x81 and nxt <= 0xC1:
             if   nxt >= 0xA0 and nxt <= 0xAF:
                 return self.read_special()
             elif nxt >= 0xB0 and nxt <= 0xBB:
                 return self.read_typed_value()
             elif nxt == 0x84:
                 return self.read_typed_array()
+            elif nxt == 0x8C:
+                self.inp.read(1)
+                self.lru.extend(self.read_list())
+                return self.read_object()
             elif nxt == 0x90:
                 return self.read_list()
             elif nxt == 0x92:

@@ -37,14 +37,14 @@ python3 muon_python/mu2json.py ./AirlineDelays.mu > ./AirlineDelays.json
   - **Typed**: integer and float numbers
   - **Special**: `True`, `False`, `Null`, `NaN`, `-Inf`, `+Inf`
 - Composite:
-  - **TypedArray** (a bunch of elements of the same type, possibly chunked)
-  - **List** (sequence of arbitrary elements)
-  - **Dict** (associative container of key-value pairs)
-  - **Attr** (an dictionary that contains meta-information)
+  - **TypedArray** - array of elements of the same type, possibly chunked
+  - **List** - sequence of arbitrary elements
+  - **Dict** - associative container of key-value pairs
+  - **Attr** - dictionary that contains meta-information
 
 ---
 
-**Disclaimer:** the notation is still Work In Progress.  
+**Disclaimer: the notation is still Work In Progress.**
 If you have any ideas or comments, please feel free to [post them here](https://github.com/vshymanskyy/muon/issues).
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct-single.svg)](https://stand-with-ukraine.pp.ua)

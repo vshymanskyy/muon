@@ -10,8 +10,8 @@ ofn = sys.argv[2]
 with open(ifn) as f:
     data = json.load(f)
 
-if False:
-    print("Building dictionary")
+if True:
+    print("Analysing JSON")
     d = muon.DictBuilder()
     d.add(data)
     t = d.get_dict(512)
@@ -37,5 +37,8 @@ if ofn.endswith(".hs"):
 else:
     f = open(ofn, 'wb')
 
-muon = muon.Writer(f, table=t)
+muon = muon.Writer(f)
+#muon.tag_muon()
+if len(t):
+    muon.add_lru_list(reversed(t))
 muon.add(data)
