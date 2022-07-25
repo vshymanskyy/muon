@@ -36,5 +36,7 @@ Future goals:
   - **Dict** (associative container of key-value pairs)
   - **Attr** (an dictionary that contains meta-information)
 
-**Disclaimer:** the notation is still Work In Progress.
+---
+
+**Disclaimer:** the notation is still Work In Progress.  
 If you have any ideas or comments, please feel free to [post them here](https://github.com/vshymanskyy/muon/issues).
