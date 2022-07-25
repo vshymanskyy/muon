@@ -1,0 +1,11 @@
+name,key,string,int,float,list-item,dict,list,bool,null,size
+./data/AirlineDelays,136648,22040,83752,,4408,35264,1,,,3440.71
+./data/BitcoinLatestBlock,5,1,507,,504,1,1,,,8.46
+./data/BitcoinUnconfirmedTransactions,8924,2112,4728,,1058,1420,796,727,200,341.63
+./data/GithubEvents,7544,5077,852,,289,971,135,612,187,313.75
+./data/NearEarthAsteroids,1995,1995,,,202,202,1,,,40.41
+./data/NobelLaureate,18714,16770,,,2992,2735,2202,,,465.43
+./data/SensorData,98,13,6937,22989,29880,16,17,4,3,471.43
+./data/small/CouchDB4k,27,28,105,108,230,7,10,,,3.77
+./data/small/MediaContent,23,12,9,,4,4,2,,1,0.47
+./data/small/TwitterTimeline,66,25,11,,3,4,4,17,9,2.02

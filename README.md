@@ -28,7 +28,6 @@ python3 muon_python/mu2json.py ./AirlineDelays.mu > ./AirlineDelays.json
 
 Run benchmarks:
 ```sh
-mkdir results
 ./muon_python/extra/json-analyze.py ./data/*.json ./data/small/*.json
 ./muon_python/mu-benchmark.py ./data/*.json ./data/small/*.json
 ```
