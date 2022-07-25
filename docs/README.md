@@ -37,11 +37,9 @@ Applies to: `TypedArray`
 #### `0x8F` Muon Format Identifier
 
 Can be used at the start of a file or stream and allows the reader to more reliably guess that Muon format is used.  
-It also has a 3-byte payload:
-- `CE BC` is utf-8 encoding of `μ` (Greek Small Letter Mu)
-- `01` is Muon version (currently always 1)
+It also has a 3-byte payload: `CE BC 31` which is utf-8 encoding of `μ1` (Greek Small Letter Mu and Muon version, currently always 1)
 
-Payload: `CE BC 01`  
+Payload: `CE BC 31`  
 Applies to: only appears at the beginning of file/stream once
 
 #### `0xFF` Padding
