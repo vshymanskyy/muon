@@ -6,7 +6,6 @@ File extension:   .mu
 MIME type:        application/muon
 Endianness:       little-endian
 ```
----
 
 Muon has some interesting  properties (see [**presentation**](https://bit.ly/muon-present) for more details):
 - Every `UTF8` string is a valid `muon` object
