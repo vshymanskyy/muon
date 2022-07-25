@@ -18,7 +18,7 @@ Applies to: `Dict`, `List`, `TypedArray`
 
 #### `0x8C` Referenced String
 
-Instructs that the following string needs to be added to the LRU string table.
+Instructs that the following string needs to be added to the LRU string list.
 
 Payload: none  
 Applies to: `String`, `List`
