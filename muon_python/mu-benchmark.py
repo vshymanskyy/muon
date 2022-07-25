@@ -18,6 +18,8 @@ import lzma
 import brotli
 import heatshrink2
 
+validate = True
+
 def pack_bson(data):
     try:
         return bson.dumps(data)
@@ -30,14 +32,15 @@ def ppjson(data):
 def pack_muon(data, refs):
     orig_json = ppjson(data)
 
-    res = muon.dumps(data, refs=True)
+    res = muon.dumps(data, refs)
 
-    m = muon.Reader(io.BytesIO(res))
-    decoded = m.read_object()
-    decoded_json = ppjson(decoded)
+    if validate:
+        m = muon.Reader(io.BytesIO(res))
+        decoded = m.read_object()
+        decoded_json = ppjson(decoded)
 
-    if decoded_json != orig_json:
-        print("Muon validation failed")
+        if decoded_json != orig_json:
+            print("Muon validation failed")
     return res
 
 encoders = {

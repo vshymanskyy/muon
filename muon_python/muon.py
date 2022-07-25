@@ -32,7 +32,7 @@ class DictBuilder:
         for k, v in self._count.items():
             self._count[k] = (v-1) * len(k)
 
-        res = filter(lambda x: x[1] >= 6, self._count.most_common())
+        res = filter(lambda x: x[1] > 6, self._count.most_common())
         return list(map(lambda x: x[0], res))[0:size]
 
 def detect_array_type(arr):
@@ -99,7 +99,7 @@ class Writer:
                 f16 = struct.pack('<e', val)
                 if struct.unpack('<e', f16)[0] == val:
                     self.out.write(b'\xB8' + f16)
-                    print(f'Stored f16: {f16}')
+                    #print(f'Stored f16: {f16}')
                     return
             except:
                 pass
@@ -115,6 +115,7 @@ class Writer:
 
             self.out.write(b'\xBA' + struct.pack('<d', val))
         elif isinstance(val, array.array):
+
             raise Exception("TODO: TypedArrays")
         elif isinstance(val, Sequence):
             t = None
@@ -124,14 +125,14 @@ class Writer:
             if t == 'int':
                 #print(f"Detected array int[{len(val)}]")
                 self.out.write(b'\x84\xBB')
-                self.out.write(leb128.i.encode(len(val)))
+                self.out.write(leb128.u.encode(len(val)))
                 for v in val:
                     self.out.write(leb128.i.encode(v))
                 self.out.write(b'\x00')
             elif t == 'float':
                 #print(f"Detected array float[{len(val)}]")
                 self.out.write(b'\x84\xBA')
-                self.out.write(leb128.i.encode(len(val)))
+                self.out.write(leb128.u.encode(len(val)))
                 for v in val:
                     self.out.write(struct.pack('<d', v))
                 self.out.write(b'\x00')
@@ -181,7 +182,7 @@ class Writer:
         if self.detect_binary and not bool(re.search('\s', val)):
             tmp = None
 
-            if tmp == None and (strlen == 32 or strlen == 40 or strlen > 120):
+            if tmp == None and (strlen == 32 or strlen == 40 or strlen >= 64):
                 try:
                     tmp = bytes.fromhex(val)
                     #print(f"Detected hex: {val}")
@@ -197,7 +198,7 @@ class Writer:
 
             if not tmp == None:
                 self.out.write(b'\x84\xB4')
-                self.out.write(leb128.i.encode(len(tmp)))
+                self.out.write(leb128.u.encode(len(tmp)))
                 self.out.write(tmp)
                 self.out.write(b'\x00')
                 return
@@ -221,6 +222,21 @@ class Writer:
     def end_dict(self):           self.out.write(b'\x93')
     def start_attr(self):         self.out.write(b'\x94')
     def end_attr(self):           self.out.write(b'\x95')
+
+def get_array_type_code(t):
+    if   t == 0xB0: return 'b'
+    elif t == 0xB1: return 'h'
+    elif t == 0xB2: return 'l'
+    elif t == 0xB3: return 'q'
+
+    elif t == 0xB4: return 'B'
+    elif t == 0xB5: return 'H'
+    elif t == 0xB6: return 'L'
+    elif t == 0xB7: return 'Q'
+
+    elif t == 0xB8: return None # f16
+    elif t == 0xB9: return 'f'
+    elif t == 0xBA: return 'd'
 
 class Reader:
     def __init__(self, inp):
@@ -269,6 +285,25 @@ class Reader:
         else:
             raise Exception(f"Unknown typed value: {t}")
 
+    def read_typed_array(self):
+        assert(self.inp.read(1) == b'\x84')
+        t = self.inp.read(1)[0]
+        n, _ = leb128.u.decode_reader(self.inp)
+        if t == 0xBB:
+            res = []
+            for i in range(0, n):
+                val, _ = leb128.i.decode_reader(self.inp)
+                res.append(val)
+            assert(self.inp.read(1) == b'\x00')
+            return res
+        else:
+            code = get_array_type_code(t)
+            res = array.array(code)
+            # TODO: use struct here to ensure Little-Endian byte order
+            res.fromfile(self.inp, n)
+            assert(self.inp.read(1) == b'\x00')
+            return res.tolist()
+
     def read_list(self):
         res = []
         assert(self.inp.read(1) == b'\x90')
@@ -296,9 +331,6 @@ class Reader:
             res[key] = val
         self.inp.read(1)
         return res
-
-    def read_typed_array(self):
-        raise Exception("TODO: TypedArrays")
 
     def read_object(self):
         nxt = self.peek_byte()

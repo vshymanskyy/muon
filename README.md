@@ -26,6 +26,13 @@ python3 muon_python/json2mu.py ./data/AirlineDelays.min.json ./AirlineDelays.mu
 python3 muon_python/mu2json.py ./AirlineDelays.mu > ./AirlineDelays.json
 ```
 
+Run benchmarks:
+```sh
+mkdir results
+./muon_python/extra/json-analyze.py ./data/*.json ./data/small/*.json
+./muon_python/mu-benchmark.py ./data/*.json ./data/small/*.json
+```
+
 ## Muon structure
 
 [![alt tag](docs/muon.png?raw=true)](https://bit.ly/muon-present)
