@@ -19,6 +19,13 @@ Muon has some interesting  properties (see [**presentation**](https://bit.ly/muo
 Future goals:
 - Strict specification (little or no room for implementation-specific behavior / vendor-specific extensions)
 
+## Try it yourself
+
+```sh
+python3 muon_python/json2mu.py ./data/AirlineDelays.min.json ./AirlineDelays.mu
+python3 muon_python/mu2json.py ./AirlineDelays.mu > ./AirlineDelays.json
+```
+
 ## Muon structure
 
 [![alt tag](docs/muon.png?raw=true)](https://bit.ly/muon-present)
