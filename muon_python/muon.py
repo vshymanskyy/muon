@@ -335,7 +335,10 @@ def dumps(data, refs=0):
         t = []
 
     out = io.BytesIO()
-    m = Writer(out, table=t)
+    m = Writer(out)
+    #m.tag_muon()
+    if len(t):
+        m.add_lru_list(reversed(t))
     m.add(data)
     return out.getvalue()
 

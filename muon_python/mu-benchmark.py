@@ -24,16 +24,32 @@ def pack_bson(data):
     except:
         return bson.dumps({'':data})
 
+def ppjson(data):
+    return json.dumps(data, indent=4, sort_keys=True)
+
+def pack_muon(data, refs):
+    orig_json = ppjson(data)
+
+    res = muon.dumps(data, refs=True)
+
+    m = muon.Reader(io.BytesIO(res))
+    decoded = m.read_object()
+    decoded_json = ppjson(decoded)
+
+    if decoded_json != orig_json:
+        print("Muon validation failed")
+    return res
+
 encoders = {
   "BSON":       pack_bson,
   "UBJSON":     lambda data: ubjson.dumpb(data),
   #"MsgPack":   lambda data: msgpack.packb(data),
   "CBOR":       lambda data: cbor2.dumps(data, string_referencing=False),
   #"Smile":     lambda data: pysmile.encode(data),
-  "Muon":       lambda data: muon.dumps(data, refs=False),
+  "Muon":       lambda data: pack_muon(data, refs=False),
 
   "CBOR+refs":  lambda data: cbor2.dumps(data, string_referencing=True),
-  "Muon+refs":  lambda data: muon.dumps(data, refs=True),
+  "Muon+refs":  lambda data: pack_muon(data, refs=True),
   "JSON":       lambda data: json.dumps(data, separators=(',', ':')).encode('utf8'),
 }
 
@@ -47,8 +63,7 @@ compressors = {
   "hs":     lambda data: heatshrink2.compress(data, window_sz2=12, lookahead_sz2=5),
 }
 
-comprs = [None, 'gz']
-#comprs += list(compressors.keys())
+comprs = [None, 'gz'] # + list(compressors.keys())
 
 for compr in comprs:
 
@@ -63,6 +78,7 @@ for compr in comprs:
     writer.writeheader()
 
     for ifn in sys.argv[1:]:
+        print(ifn)
 
         with open(ifn) as f:
             data = json.load(f)
