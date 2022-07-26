@@ -4,14 +4,16 @@ This document mostly contains some details omitted from the [original presentati
 
 #### `0x8A` Count
 
-Specifies size of the following structure in **elements**.
+Specifies size of the following structure in **elements**.  
+This tag can optioanlly added to enable efficient resource allocation by the parser.
 
 Payload: `LEB128`  
 Applies to: `Dict`, `List`
 
 #### `0x8B` Size
 
-Specifies size of the following structure in **bytes**.
+Specifies size of the following structure in **bytes**.  
+This tag can optioanlly added to enable efficient parsing/filtering/scanning of the document.
 
 Payload: `LEB128`  
 Applies to: `Dict`, `List`, `TypedArray`
