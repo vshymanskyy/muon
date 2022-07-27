@@ -118,29 +118,42 @@ class Writer:
 
             raise Exception("TODO: TypedArrays")
         elif isinstance(val, Sequence):
-            t = None
             if self.detect_arrays:
+                """
+                for code in "Bb":
+                    try:
+                        res = array.array(code, val)
+                        code = get_typed_array_marker(code)
+                        self.out.write(b'\x84' + bytes([code]))
+                        self.out.write(leb128.u.encode(len(res)))
+                        res.tofile(self.out)
+                        self.out.write(b'\x00')
+                        return
+                    except:
+                        pass
+                """
                 t = detect_array_type(val)
+                if t == 'int':
+                    #print(f"Detected array int[{len(val)}]")
+                    self.out.write(b'\x84\xBB')
+                    self.out.write(leb128.u.encode(len(val)))
+                    for v in val:
+                        self.out.write(leb128.i.encode(v))
+                    self.out.write(b'\x00')
+                    return
+                elif t == 'float':
+                    #print(f"Detected array float[{len(val)}]")
+                    self.out.write(b'\x84\xBA')
+                    self.out.write(leb128.u.encode(len(val)))
+                    for v in val:
+                        self.out.write(struct.pack('<d', v))
+                    self.out.write(b'\x00')
+                    return
 
-            if t == 'int':
-                #print(f"Detected array int[{len(val)}]")
-                self.out.write(b'\x84\xBB')
-                self.out.write(leb128.u.encode(len(val)))
-                for v in val:
-                    self.out.write(leb128.i.encode(v))
-                self.out.write(b'\x00')
-            elif t == 'float':
-                #print(f"Detected array float[{len(val)}]")
-                self.out.write(b'\x84\xBA')
-                self.out.write(leb128.u.encode(len(val)))
-                for v in val:
-                    self.out.write(struct.pack('<d', v))
-                self.out.write(b'\x00')
-            else:
-                self.start_list()
-                for v in val:
-                    self.add(v)
-                self.end_list()
+            self.start_list()
+            for v in val:
+               self.add(v)
+            self.end_list()
         elif isinstance(val, Mapping):
             self.start_dict()
             for k, v in val.items():
@@ -208,7 +221,13 @@ class Writer:
             #print (f"Found {val} at LRU {idx}")
             self.out.write(b'\x81' + leb128.u.encode(idx))
         else:
-            self.out.write(val.encode('utf8') + b'\x00')
+            buff = val.encode('utf8')
+            if b'\x00' in buff:         # TODO: or len(buff) >= 512
+                self.out.write(b'\x82')
+                self.out.write(leb128.u.encode(len(buff)))
+                self.out.write(buff)
+            else:
+                self.out.write(buff + b'\x00')
 
     def add_binary(self, val):
         self.out.write(b'\x84\xB4')
@@ -238,6 +257,19 @@ def get_array_type_code(t):
     elif t == 0xB9: return 'f'
     elif t == 0xBA: return 'd'
 
+def get_typed_array_marker(t):
+    if   t == 'b': return 0xB0
+    elif t == 'h': return 0xB1
+    elif t == 'l': return 0xB2
+    elif t == 'q': return 0xB3
+
+    elif t == 'B': return 0xB4
+    elif t == 'H': return 0xB5
+    elif t == 'L': return 0xB6
+    elif t == 'Q': return 0xB7
+
+    elif t == 'd': return 0xB9
+
 class Reader:
     def __init__(self, inp):
         self.lru = deque()
@@ -252,8 +284,11 @@ class Reader:
     def read_string(self):
         c = self.inp.read(1)
         if c == b'\x81':
-            n, l = leb128.u.decode_reader(self.inp)
+            n, _ = leb128.u.decode_reader(self.inp)
             return self.lru[-1-n]
+        elif c == b'\x82':
+            n, _ = leb128.u.decode_reader(self.inp)
+            return self.inp.read(n).decode('utf8')
         else:
             # read until 0
             buff = b''
@@ -280,7 +315,7 @@ class Reader:
         elif t == 0xB8:
             return struct.unpack('<e', self.inp.read(2))[0]
         elif t == 0xBB:
-            n, l = leb128.i.decode_reader(self.inp)
+            n, _ = leb128.i.decode_reader(self.inp)
             return n
         else:
             raise Exception(f"Unknown typed value: {t}")
@@ -336,7 +371,9 @@ class Reader:
         nxt = self.peek_byte()
 
         if nxt > 0x81 and nxt <= 0xC1:
-            if   nxt >= 0xA0 and nxt <= 0xAF:
+            if nxt == 0x82:
+                return self.read_string()
+            elif nxt >= 0xA0 and nxt <= 0xAF:
                 return self.read_special()
             elif nxt >= 0xB0 and nxt <= 0xBB:
                 return self.read_typed_value()
