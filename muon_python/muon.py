@@ -66,8 +66,6 @@ class Writer:
         self.lru = deque(maxlen=512)
 
         self.detect_arrays = True
-        self.detect_binary = False
-        self.detect_numstr = False
 
     def tag_muon(self):
         self.out.write(b'\x8F\xCE\xBC\x31')
@@ -177,6 +175,8 @@ class Writer:
         val = str(val)
         strlen = len(val)
 
+
+        """ TODO: move this to a separate lint/optimization step
         if self.detect_numstr:
             if not val.startswith('0'):
                 try:
@@ -216,6 +216,7 @@ class Writer:
                 self.out.write(tmp)
                 self.out.write(b'\x00')
                 return
+        """
 
         if val in self.lru:
             idx = len(self.lru) - self.lru.index(val) - 1
