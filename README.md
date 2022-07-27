@@ -22,6 +22,7 @@ Future goals:
 ## Try it yourself
 
 ```sh
+pip install leb128
 python3 muon_python/json2mu.py ./data/AirlineDelays.min.json ./AirlineDelays.mu
 python3 muon_python/mu2json.py ./AirlineDelays.mu > ./AirlineDelays.json
 ```
