@@ -10,7 +10,7 @@ Endianness:       little-endian
 Muon has some interesting  properties (see [**presentation**](https://bit.ly/muon-present) for more details):
 - Every `UTF8` string is a valid `muon` object
 - Gaps in the `UTF8` encoding space are used to encode things like `[` `]` `{` `}` etc.
-- Muon is self-describing and schemaless, just like `JSON`
+- Muon is self-describing and schemaless, just like `JSON` (unlike `Protobuf` and `FlatBuffers`)
 - Compact (~10..50% smaller than `JSON`). On par or outperforms `CBOR`, `MsgPack`, `UBJSON`
 - Unlimited size of objects and values
 - Data is ready to be used in-place without pre-processing
