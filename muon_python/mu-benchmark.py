@@ -10,6 +10,7 @@ import cbor2
 import ubjson
 #import pysmile
 import muon
+#from flatbuffers import flexbuffers
 
 #import zlib
 import gzip
@@ -45,6 +46,7 @@ def pack_muon(data, refs):
 
 encoders = {
   "BSON":       pack_bson,
+  #"FlexBuf":    lambda data: flexbuffers.Dumps(data),
   "UBJSON":     lambda data: ubjson.dumpb(data),
   #"MsgPack":   lambda data: msgpack.packb(data),
   "CBOR":       lambda data: cbor2.dumps(data, string_referencing=False),
