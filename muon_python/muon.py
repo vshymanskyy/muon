@@ -115,8 +115,9 @@ class Writer:
 
             self.out.write(b'\xBA' + struct.pack('<d', val))
         elif isinstance(val, array.array):
-
-            raise Exception("TODO: TypedArrays")
+            code = get_typed_array_marker(val.typecode)
+            self.out.write(b'\x84' + struct.pack("<B", code))
+            self.out.write(leb128.u.encode(len(val)) + val.tobytes() + b'\x00')
         elif isinstance(val, Sequence):
             if self.detect_arrays:
                 """
@@ -413,5 +414,5 @@ def dumps(data, refs=0):
 
 def loads(data):
     inp = io.BytesIO(data)
-    m = Reader(out)
+    m = Reader(inp)
     return m.read_object()
