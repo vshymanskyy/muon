@@ -40,13 +40,6 @@ Notes:
 1. Once the list is full, items are discarded from the beginning
 2. If applied to a String Reference (type `0x81`), associated string is moved to the top of the LRU list
 
-#### `0x8D` Chunked Array
-
-MUST be used to mark a multi-chunk `TypedArray`.
-
-Payload: none  
-Applies to: `TypedArray`
-
 #### `0x8F` Muon Format Identifier
 
 Can be used at the start of a file or stream and allows the reader to more reliably guess that Muon format is used.  
