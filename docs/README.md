@@ -1,5 +1,7 @@
 This document mostly contains some details omitted from the [original presentation](https://bit.ly/muon-present)
 
+[![alt tag](muon.png?raw=true)](https://bit.ly/muon-present)
+
 ## Muon types
 
 - Primitive:
@@ -10,6 +12,32 @@ This document mostly contains some details omitted from the [original presentati
   - **TypedArray** - array of elements of the same type, possibly chunked
   - **List** - ordered sequence of arbitrary elements
   - **Dict** - ordered associative container of key-value pairs
+
+#### Strings
+
+`0x81` reference to a string in an LRU list, counting from top
+
+`0x82` fixed-length string. Useful when encoding:
+- long strings (>512 bytes)
+- strings that contain `0x00`bytes
+
+#### Integers
+
+`0xA0..0xA9` single-digit integers (for short encoding)
+
+`0xB0..0xB7` typed integers
+
+`0xBB` LEB128 - encoded integers
+
+#### Floats
+
+`0xB8`- float16, `0xB9` - float32, `0xBA` - float64
+
+#### TypedArrays
+
+`0x84` - `TypedArray`
+
+`0x85` - chunked `TypedArray`. In chunked arrays, the `len`+`values` sequence can is repeated until a zero-length chunk.
 
 ## Muon tags
 
