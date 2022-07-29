@@ -38,21 +38,11 @@ Run benchmarks:
 
 [![alt tag](docs/muon.png?raw=true)](https://bit.ly/muon-present)
 
-## Muon types
-
-- Primitive:
-  - **String**
-  - **Typed**: integer and float numbers
-  - **Special**: `True`, `False`, `Null`, `NaN`, `-Inf`, `+Inf`
-- Composite:
-  - **TypedArray** - array of elements of the same type, possibly chunked
-  - **List** - sequence of arbitrary elements
-  - **Dict** - associative container of key-value pairs
-  - **Attr** - dictionary that contains meta-information
-
----
+See more [**in documentation**](./docs/README.md).
 
 **Disclaimer: the notation is still Work In Progress.**
 If you have any ideas or comments, please feel free to [post them here](https://github.com/vshymanskyy/muon/issues).
+
+---
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner-direct-single.svg)](https://stand-with-ukraine.pp.ua)
