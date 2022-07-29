@@ -19,7 +19,7 @@ This document mostly contains some details omitted from the [original presentati
 
 `0x82` fixed-length string. Useful when encoding:
 - long strings (>512 bytes)
-- strings that contain `0x00`bytes
+- strings that contain `null characters (0x00)`
 
 #### Integers
 
@@ -32,6 +32,17 @@ This document mostly contains some details omitted from the [original presentati
 #### Floats
 
 `0xB8`- float16, `0xB9` - float32, `0xBA` - float64
+
+#### Special values
+
+```c
+0xAA  False
+0xAB  True
+0xAC  Null/None
+0xAD  NaN
+0xAE  -Inf
+0xAF  +Inf
+```
 
 #### TypedArrays
 
