@@ -1,4 +1,4 @@
-This document mostly contains some details omitted from the [original presentation](https://bit.ly/muon-present)
+This document mostly contains some details omitted from the [**original presentation**](https://bit.ly/muon-present)
 
 [![alt tag](muon.png?raw=true)](https://bit.ly/muon-present)
 
