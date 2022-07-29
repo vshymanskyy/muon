@@ -115,7 +115,8 @@ class Writer:
         elif isinstance(val, array.array):
             code = get_typed_array_marker(val.typecode)
             self.out.write(b'\x84' + struct.pack("<B", code))
-            self.out.write(leb128.u.encode(len(val)) + val.tobytes() + b'\x00')
+            self.out.write(leb128.u.encode(len(val)))
+            self.out.write(val.tobytes())
         elif isinstance(val, Sequence):
             if self.detect_arrays:
                 """
@@ -126,7 +127,6 @@ class Writer:
                         self.out.write(b'\x84' + bytes([code]))
                         self.out.write(leb128.u.encode(len(res)))
                         res.tofile(self.out)
-                        self.out.write(b'\x00')
                         return
                     except:
                         pass
@@ -138,7 +138,6 @@ class Writer:
                     self.out.write(leb128.u.encode(len(val)))
                     for v in val:
                         self.out.write(leb128.i.encode(v))
-                    self.out.write(b'\x00')
                     return
                 elif t == 'float':
                     #print(f"Detected array float[{len(val)}]")
@@ -146,7 +145,6 @@ class Writer:
                     self.out.write(leb128.u.encode(len(val)))
                     for v in val:
                         self.out.write(struct.pack('<d', v))
-                    self.out.write(b'\x00')
                     return
 
             self.start_list()
@@ -159,13 +157,6 @@ class Writer:
                 self.add_str(k)
                 self.add(v)
             self.end_dict()
-
-    def add_attr(self, val):
-        self.start_attr()
-        for k, v in val.items():
-            self.add_str(k)
-            self.add(v)
-        self.end_attr()
 
     """
     Low-level API
@@ -214,7 +205,6 @@ class Writer:
                 self.out.write(b'\x84\xB4')
                 self.out.write(leb128.u.encode(len(tmp)))
                 self.out.write(tmp)
-                self.out.write(b'\x00')
                 return
         """
 
@@ -231,18 +221,10 @@ class Writer:
             else:
                 self.out.write(buff + b'\x00')
 
-    def add_binary(self, val):
-        self.out.write(b'\x84\xB4')
-        self.out.write(leb128.u.encode(len(val)))
-        self.out.write(val)
-        self.out.write(b'\x00')
-
     def start_list(self):         self.out.write(b'\x90')
     def end_list(self):           self.out.write(b'\x91')
     def start_dict(self):         self.out.write(b'\x92')
     def end_dict(self):           self.out.write(b'\x93')
-    def start_attr(self):         self.out.write(b'\x94')
-    def end_attr(self):           self.out.write(b'\x95')
 
 def get_array_type_code(t):
     if   t == 0xB0: return 'b'
@@ -323,7 +305,7 @@ class Reader:
             raise Exception(f"Unknown typed value: {t}")
 
     def read_typed_array(self):
-        assert(self.inp.read(1) == b'\x84')
+        chunked = (self.inp.read(1) == b'\x85')
         t = self.inp.read(1)[0]
         n, _ = leb128.u.decode_reader(self.inp)
         if t == 0xBB:
@@ -331,14 +313,12 @@ class Reader:
             for i in range(0, n):
                 val, _ = leb128.i.decode_reader(self.inp)
                 res.append(val)
-            assert(self.inp.read(1) == b'\x00')
             return res
         else:
             code = get_array_type_code(t)
             res = array.array(code)
             # TODO: use struct here to ensure Little-Endian byte order
             res.fromfile(self.inp, n)
-            assert(self.inp.read(1) == b'\x00')
             return res.tolist()
 
     def read_list(self):
@@ -359,16 +339,6 @@ class Reader:
         self.inp.read(1)
         return res
 
-    def read_attrs(self):
-        res = {}
-        assert(self.inp.read(1) == b'\x94')
-        while not self.peek_byte() == 0x95:
-            key = self.read_string()
-            val = self.read_object()
-            res[key] = val
-        self.inp.read(1)
-        return res
-
     def read_object(self):
         nxt = self.peek_byte()
 
@@ -379,7 +349,7 @@ class Reader:
                 return self.read_special()
             elif nxt >= 0xB0 and nxt <= 0xBB:
                 return self.read_typed_value()
-            elif nxt == 0x84:
+            elif nxt == 0x84 or nxt == 0x85:
                 return self.read_typed_array()
             elif nxt == 0x8C:
                 self.inp.read(1)
@@ -389,9 +359,6 @@ class Reader:
                 return self.read_list()
             elif nxt == 0x92:
                 return self.read_dict()
-            elif nxt == 0x94:
-                attr = self.read_attrs()
-                return self.read_object()
             else:
                 raise Exception("Unknown object")
         else:

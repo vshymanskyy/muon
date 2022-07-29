@@ -11,6 +11,8 @@ import ubjson
 #import pysmile
 import muon
 #from flatbuffers import flexbuffers
+#import pickle
+#import marshal
 
 #import zlib
 import gzip
@@ -51,6 +53,8 @@ encoders = {
   #"MsgPack":   lambda data: msgpack.packb(data),
   "CBOR":       lambda data: cbor2.dumps(data, string_referencing=False),
   #"Smile":     lambda data: pysmile.encode(data),
+  #"pickle":     lambda data: pickle.dumps(data),
+  #"marshal":    lambda data: marshal.dumps(data),
   "Muon":       lambda data: pack_muon(data, refs=False),
 
   "CBOR+refs":  lambda data: cbor2.dumps(data, string_referencing=True),
