@@ -1,5 +1,16 @@
 This document mostly contains some details omitted from the [original presentation](https://bit.ly/muon-present)
 
+## Muon types
+
+- Primitive:
+  - **String**
+  - **Typed**: integer and float numbers
+  - **Special**: `True`, `False`, `Null`, `NaN`, `-Inf`, `+Inf`
+- Composite:
+  - **TypedArray** - array of elements of the same type, possibly chunked
+  - **List** - ordered sequence of arbitrary elements
+  - **Dict** - ordered associative container of key-value pairs
+
 ## Muon tags
 
 #### `0x8A` Count
