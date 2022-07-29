@@ -48,7 +48,7 @@ This document mostly contains some details omitted from the [**original presenta
 
 `0x84` - `TypedArray`
 
-`0x85` - chunked `TypedArray`. In chunked arrays, the `len`+`values` sequence can is repeated until a zero-length chunk.
+`0x85` - chunked `TypedArray`. In chunked arrays, the `len`+`values` sequence is repeated until a zero-length chunk
 
 ## Muon tags
 
