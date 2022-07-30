@@ -45,7 +45,7 @@ This document mostly contains some details omitted from the [**original presenta
 #### TypedArray
 
 `0x84` - `TypedArray`  
-`0x85` - chunked `TypedArray`. the `len`+`values` sequence is repeated until a zero-length chunk
+`0x85` - chunked `TypedArray`. the `count`+`values` sequence is repeated until a zero-length chunk
 
 #### List
 
