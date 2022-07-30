@@ -23,11 +23,9 @@ This document mostly contains some details omitted from the [**original presenta
 
 #### Integer
 
-`0xA0..0xA9` single-digit integers (for short encoding)
-
-`0xB0..0xB7` typed integers (Little-Endian)
-
-`0xBB` LEB128 - encoded integers
+`0xA0..0xA9` - single-digit integers (for short encoding)  
+`0xB0..0xB7` - typed integers (Little-Endian)  
+`0xBB` - LEB128 encoded integers
 
 #### Float
 
@@ -46,9 +44,8 @@ This document mostly contains some details omitted from the [**original presenta
 
 #### TypedArray
 
-`0x84` - `TypedArray`
-
-`0x85` - chunked `TypedArray`. In chunked arrays, the `len`+`values` sequence is repeated until a zero-length chunk
+`0x84` - `TypedArray`  
+`0x85` - chunked `TypedArray`. the `len`+`values` sequence is repeated until a zero-length chunk
 
 #### List
 
@@ -61,6 +58,8 @@ A sequence of arbitrary Muon objects
 - Keys can be `Integer` or `String`
 - All keys should be of the same type (not of specific encoding!)
 - If typed integer (`0xB0..0xB7`) is used for the first key, all subsequent keys **MUST** of the same type, and type specifier (`0xBx`) is omitted for them
+
+---
 
 ## Muon tags
 
