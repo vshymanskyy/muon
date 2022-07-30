@@ -104,7 +104,7 @@ Applies to: anything
 
 ---
 
-## Deterministic Decoding/Encoding
+## Deterministic Encoding
 
 Muon Encoder can optimize it's output, selecting from multiple available encoding for the same value.  
 Sometimes, it's desired to have a deterministic encoding, where the same structure maps to the same binary output.  
