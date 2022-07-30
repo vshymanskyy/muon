@@ -101,3 +101,30 @@ Can be used to align the following value in memory, or as stream keep-alive sign
 
 Payload: none  
 Applies to: anything
+
+#### Deterministic Decoding/Encoding
+
+Muon Encoder can optimize it's output, selecting from multiple available encoding for the same value.  
+Sometimes, it's desired to have a deterministic encoding, where the same structure maps to the same binary output.  
+Specificly, for deterministic muon: `muon_generate(muon_parse(original_bytes)) == original_bytes`.  
+
+For creating a deterministic Muon, follow the following rules:
+
+- String:
+  - should have a valid and deterministic encoding in UTF8 (out of scope for this document)
+  - references must not be used
+  - must be encoded as fixed-length if:
+    - longer than 512 bytes, or
+    - contain `0x00` bytes
+  - must be encoded as 0-terminated in all other cases
+- Integer:
+  - `0..9` must use special encoding (`0xA0..0xA9`)
+  - LEB128 encoding (`0xBB`) is used for all other standalone integers
+- Float:
+  - `NaN`, `-Inf`, `+Inf` must be encoded using special encoding (`0xAD..0xAF`)
+  - float64 (`0xBA`) format is used in all other cases
+- TypedArray:
+  - must preserve their type when re-encoding
+- Tags:
+  - `count`,`size`,`ref.str`,`padding` tags must not be used
+  - magic tag `0x8F` must be ignored when comparing deterministic documents (i.e. may be present or missing)
