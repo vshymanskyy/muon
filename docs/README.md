@@ -54,7 +54,7 @@ A sequence of arbitrary Muon objects
 - Dictionary is ordered by default
 - Duplicate keys are not allowed
 - Keys can be `Integer` or `String`
-- All keys should be of the same type (i.e. all strings or all ints)
+- All keys MUST be of the same type (i.e. all strings or all ints)
   - Mixing different string encodings is explicitly allowed
 - For integer keys:
   - Typed integer (`0xB0..0xB7` or `0xBB`) encoding is used for the first key
@@ -117,7 +117,7 @@ Specificly, for deterministic muon: `muon_generate(muon_parse(original_bytes)) =
 For creating a deterministic Muon, follow the following rules:
 
 - String:
-  - should have a valid and deterministic encoding in UTF8 (out of scope for this document)
+  - must have a valid and deterministic encoding in UTF8 (out of scope for this document)
   - references must not be used
   - must be encoded as fixed-length if:
     - longer than 512 bytes, or
