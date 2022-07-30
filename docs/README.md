@@ -49,13 +49,17 @@ This document mostly contains some details omitted from the [**original presenta
 
 A sequence of arbitrary Muon objects
 
-#### Dictionary
+#### Dict
 
 - Dictionary is ordered by default
 - Duplicate keys are not allowed
 - Keys can be `Integer` or `String`
-- All keys should be of the same type (not of specific encoding!)
-- If typed integer (`0xB0..0xB7`) is used for the first key, all subsequent keys **MUST** of the same type, and type specifier (`0xBx`) is omitted for them
+- All keys should be of the same type (i.e. all strings or all ints)
+  - Mixing different string encodings is explicitly allowed
+- For integer keys:
+  - Typed integer (`0xB0..0xB7` or `0xBB`) encoding is used for the first key
+  - All subsequent keys MUST be of the same type and type specifier (`0xBx`) is omitted for them
+  - `special` encoding for integers can not be used in dicts
 
 ---
 
@@ -127,6 +131,9 @@ For creating a deterministic Muon, follow the following rules:
   - float64 (`0xBA`) format is used in all other cases
 - TypedArray:
   - must preserve their type when re-encoding
+- Dict
+  - is ordered
+  - must preserve key type
 - Tags:
   - `count`,`size`,`ref.str`,`padding` tags must not be used
   - magic tag `0x8F` must be ignored when comparing deterministic documents (i.e. may be present or missing)
