@@ -10,10 +10,10 @@ This document mostly contains some details omitted from the [**original presenta
   - **Special**: `True`, `False`, `Null`, `NaN`, `-Inf`, `+Inf`
 - Composite:
   - **TypedArray** - array of elements of the same type, possibly chunked
-  - **List** - ordered sequence of arbitrary elements
+  - **List** - ordered sequence of arbitrary objects
   - **Dict** - ordered associative container of key-value pairs
 
-#### Strings
+#### String
 
 `0x81` reference to a string in an LRU list, counting from top
 
@@ -21,7 +21,7 @@ This document mostly contains some details omitted from the [**original presenta
 - long strings (>512 bytes)
 - strings that contain `null characters (0x00)`
 
-#### Integers
+#### Integer
 
 `0xA0..0xA9` single-digit integers (for short encoding)
 
@@ -29,11 +29,11 @@ This document mostly contains some details omitted from the [**original presenta
 
 `0xBB` LEB128 - encoded integers
 
-#### Floats
+#### Float
 
 `0xB8`- float16, `0xB9` - float32, `0xBA` - float64
 
-#### Special values
+#### Special value
 
 ```c
 0xAA  False
@@ -44,11 +44,20 @@ This document mostly contains some details omitted from the [**original presenta
 0xAF  +Inf
 ```
 
-#### TypedArrays
+#### TypedArray
 
 `0x84` - `TypedArray`
 
 `0x85` - chunked `TypedArray`. In chunked arrays, the `len`+`values` sequence is repeated until a zero-length chunk
+
+#### List
+
+
+#### Dictionary
+
+Dictionary is ordered. Duplicate keys are not allowed.  
+Keys can be `Integer` or `String`. All keys should be of the same type (not of specific encoding!).  
+Additionally, if typed integer (`0xB0..0xB7`) is used for the first key, all subsequent keys are treated to be of the same type, and type specifier (`0xBx`) is omitted from keys encoding. Values remain abstract objects.
 
 ## Muon tags
 
