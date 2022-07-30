@@ -59,7 +59,7 @@ A sequence of arbitrary Muon objects
 - For integer keys:
   - Typed integer (`0xB0..0xB7` or `0xBB`) encoding is used for the first key
   - All subsequent keys MUST be of the same type and type specifier (`0xBx`) is omitted for them
-  - `special` encoding for integers can not be used in dicts
+  - `special` encoding for integers MUST NOT be used for keys
 
 ---
 
