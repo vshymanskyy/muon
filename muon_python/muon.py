@@ -68,7 +68,7 @@ class Writer:
         self.detect_arrays = True
 
     def tag_muon(self):
-        self.out.write(b'\x8F\xCE\xBC\x31')
+        self.out.write(b'\x8F\xB5\x30\x31')
 
     def add_lru_list(self, table):
         table = list(table)
