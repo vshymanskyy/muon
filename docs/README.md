@@ -102,7 +102,9 @@ Can be used to align the following value in memory, or as stream keep-alive sign
 Payload: none  
 Applies to: anything
 
-#### Deterministic Decoding/Encoding
+---
+
+## Deterministic Decoding/Encoding
 
 Muon Encoder can optimize it's output, selecting from multiple available encoding for the same value.  
 Sometimes, it's desired to have a deterministic encoding, where the same structure maps to the same binary output.  
