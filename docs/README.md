@@ -117,7 +117,7 @@ For creating a deterministic Muon, follow the following rules:
   - references must not be used
   - must be encoded as fixed-length if:
     - longer than 512 bytes, or
-    - contain `0x00` bytes
+    - contains any `0x00` bytes
   - must be encoded as 0-terminated in all other cases
 - Integer:
   - `0..9` must use special encoding (`0xA0..0xA9`)
