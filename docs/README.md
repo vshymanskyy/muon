@@ -52,14 +52,14 @@ A sequence of arbitrary Muon objects
 #### Dict
 
 - Dictionary is ordered by default
-- Duplicate keys are not allowed
+- Duplicate keys are**not** allowed
 - Keys can be `Integer` or `String`
-- All keys MUST be of the same type (i.e. all strings or all ints)
+- All keys must be of the same type (i.e. all strings or all ints)
   - Mixing different string encodings is explicitly allowed
 - For integer keys:
   - Typed integer (`0xB0..0xB7` or `0xBB`) encoding is used for the first key
-  - All subsequent keys MUST be of the same type and type specifier (`0xBx`) is omitted for them
-  - `special` encoding for integers MUST NOT be used for keys
+  - All subsequent keys must be of the same type and type specifier (`0xBx`) is omitted for them
+  - `special` encoding for integers must **not** be used for keys
 
 ---
 
@@ -116,24 +116,24 @@ Specificly, for deterministic muon: `muon_generate(muon_parse(original_bytes)) =
 
 For creating a deterministic Muon, follow the following rules:
 
-- String:
+- **String:**
   - must have a valid and deterministic encoding in UTF8 (out of scope for this document)
-  - references must not be used
+  - references are **not** used
   - must be encoded as fixed-length if:
     - longer than 512 bytes, or
     - contains any `0x00` bytes
-  - must be encoded as 0-terminated in all other cases
-- Integer:
+  - 0-terminated format is used in all other cases
+- **Integer:**
   - `0..9` must use special encoding (`0xA0..0xA9`)
   - LEB128 encoding (`0xBB`) is used for all other standalone integers
-- Float:
+- **Float:**
   - `NaN`, `-Inf`, `+Inf` must be encoded using special encoding (`0xAD..0xAF`)
   - float64 (`0xBA`) format is used in all other cases
-- TypedArray:
+- **TypedArray:**
   - must preserve their type when re-encoding
-- Dict
+- **Dict:**
   - is ordered
   - must preserve key type
-- Tags:
-  - `count`,`size`,`ref.str`,`padding` tags must not be used
+- **Tags:**
+  - `count`,`size`,`ref.str`,`padding` tags must **not** be used
   - magic tag `0x8F` must be ignored when comparing deterministic documents (i.e. may be present or missing)
