@@ -17,7 +17,7 @@ This document mostly contains some details omitted from the [**original presenta
 
 `0x81` reference to a string in an LRU list, counting from top
 
-`0x82` fixed-length string. Useful when encoding:
+`0x82` fixed-length string. `len` is in **bytes**. Useful when encoding:
 - long strings (>512 bytes)
 - strings that contain `null characters (0x00)`
 
@@ -25,13 +25,13 @@ This document mostly contains some details omitted from the [**original presenta
 
 `0xA0..0xA9` single-digit integers (for short encoding)
 
-`0xB0..0xB7` typed integers
+`0xB0..0xB7` typed integers (Little-Endian)
 
 `0xBB` LEB128 - encoded integers
 
 #### Float
 
-`0xB8`- float16, `0xB9` - float32, `0xBA` - float64
+`0xB8` - float16, `0xB9` - float32, `0xBA` - float64 (all are Little-Endian)
 
 #### Special value
 
