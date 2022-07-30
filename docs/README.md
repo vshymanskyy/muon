@@ -52,7 +52,7 @@ A sequence of arbitrary Muon objects
 #### Dict
 
 - Dictionary is ordered by default
-- Duplicate keys are**not** allowed
+- Duplicate keys are **not** allowed
 - Keys can be `Integer` or `String`
 - All keys must be of the same type (i.e. all strings or all ints)
   - Mixing different string encodings is explicitly allowed
@@ -118,11 +118,14 @@ For creating a deterministic Muon, follow the following rules:
 
 - **String:**
   - must have a valid and deterministic encoding in UTF8 (out of scope for this document)
-  - references are **not** used
   - must be encoded as fixed-length if:
     - longer than 512 bytes, or
     - contains any `0x00` bytes
   - 0-terminated format is used in all other cases
+  - LRU list:
+    - `0x8C` tag should not be applied to any strings
+    - `0x8C` tag can only apply to a single, static LRU list that apperas only once at the begining of the Muon document
+    - if present, LRU list must be preserved when re-encoding
 - **Integer:**
   - `0..9` must use special encoding (`0xA0..0xA9`)
   - LEB128 encoding (`0xBB`) is used for all other standalone integers
@@ -135,5 +138,5 @@ For creating a deterministic Muon, follow the following rules:
   - is ordered
   - must preserve key type
 - **Tags:**
-  - `count`,`size`,`ref.str`,`padding` tags must **not** be used
+  - `count`,`size`,`padding` tags must **not** be used
   - magic tag `0x8F` must be ignored when comparing deterministic documents (i.e. may be present or missing)
