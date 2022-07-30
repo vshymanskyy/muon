@@ -123,7 +123,7 @@ For creating a deterministic Muon, follow the following rules:
     - contains any `0x00` bytes
   - 0-terminated format is used in all other cases
   - LRU list:
-    - `0x8C` tag should not be applied to any strings
+    - `0x8C` tag must **not** be applied to any strings
     - `0x8C` tag can only apply to a single, static LRU list that apperas only once at the begining of the Muon document
     - if present, LRU list must be preserved when re-encoding
 - **Integer:**
