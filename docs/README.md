@@ -88,12 +88,11 @@ Notes:
 1. Once the list is full, items are discarded from the beginning
 2. If applied to a String Reference (type `0x81`), associated string is moved to the top of the LRU list
 
-#### `0x8F` Muon Format Signature (Magic)
+#### `0x8F` Muon Format Signature/Magic
 
-Can be used at the start of a file or stream and allows the reader to more reliably guess that Muon format is used.  
-It also has a 3-byte payload: `B5 30 31` which is `ISO 8859-1` encoding of `μ01` (`Greek Small Letter Mu` + `version`, currently always 1)
+Can be used at the start of a file or stream and allows the reader to [more reliably guess](https://en.wikipedia.org/wiki/List_of_file_signatures) that Muon format is used.
 
-Payload: `B5 30 31`  
+Payload: `B5 30 31` which is `ISO 8859-1` encoding of `μ01` (`Greek Small Letter Mu` + `version`, currently always 1)
 Applies to: only appears at the beginning of file/stream once
 
 #### `0xFF` Padding
