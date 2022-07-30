@@ -1,7 +1,5 @@
 This document mostly contains some details omitted from the [**original presentation**](https://bit.ly/muon-present)
 
-[![alt tag](muon.png?raw=true)](https://bit.ly/muon-present)
-
 ## Muon types
 
 - Primitive:
@@ -90,12 +88,12 @@ Notes:
 1. Once the list is full, items are discarded from the beginning
 2. If applied to a String Reference (type `0x81`), associated string is moved to the top of the LRU list
 
-#### `0x8F` Muon Format Identifier
+#### `0x8F` Muon Format Signature (Magic)
 
 Can be used at the start of a file or stream and allows the reader to more reliably guess that Muon format is used.  
-It also has a 3-byte payload: `CE BC 31` which is utf-8 encoding of `μ1` (Greek Small Letter Mu and Muon version, currently always 1)
+It also has a 3-byte payload: `B5 30 31` which is `ISO 8859-1` encoding of `μ01` (`Greek Small Letter Mu` + `version`, currently always 1)
 
-Payload: `CE BC 31`  
+Payload: `B5 30 31`  
 Applies to: only appears at the beginning of file/stream once
 
 #### `0xFF` Padding
