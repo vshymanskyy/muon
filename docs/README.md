@@ -121,11 +121,13 @@ For creating a deterministic Muon, follow the following rules:
   - must be encoded as fixed-length if:
     - longer than 512 bytes, or
     - contains any `0x00` bytes
-  - 0-terminated format is used in all other cases
-  - LRU list:
+  - string references:
     - `0x8C` tag must **not** be applied to any strings
     - `0x8C` tag can only apply to a single, static LRU list that apperas only once at the begining of the Muon document
     - if present, LRU list must be preserved when re-encoding
+    - all strings that are represented in LRU list must be encoded in string ref (`0x81`) format
+  - 0-terminated format is used in all other cases
+
 - **Integer:**
   - `0..9` must use special encoding (`0xA0..0xA9`)
   - LEB128 encoding (`0xBB`) is used for all other standalone integers
