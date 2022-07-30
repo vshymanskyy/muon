@@ -52,12 +52,15 @@ This document mostly contains some details omitted from the [**original presenta
 
 #### List
 
+A sequence of arbitrary Muon objects
 
 #### Dictionary
 
-Dictionary is ordered. Duplicate keys are not allowed.  
-Keys can be `Integer` or `String`. All keys should be of the same type (not of specific encoding!).  
-Additionally, if typed integer (`0xB0..0xB7`) is used for the first key, all subsequent keys are treated to be of the same type, and type specifier (`0xBx`) is omitted from keys encoding. Values remain abstract objects.
+- Dictionary is ordered by default
+- Duplicate keys are not allowed
+- Keys can be `Integer` or `String`
+- All keys should be of the same type (not of specific encoding!)
+- If typed integer (`0xB0..0xB7`) is used for the first key, all subsequent keys **MUST** of the same type, and type specifier (`0xBx`) is omitted for them
 
 ## Muon tags
 
