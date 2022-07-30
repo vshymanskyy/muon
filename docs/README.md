@@ -92,7 +92,7 @@ Notes:
 
 Can be used at the start of a file or stream and allows the reader to [more reliably guess](https://en.wikipedia.org/wiki/List_of_file_signatures) that Muon format is used.
 
-Payload: `B5 30 31` which is `ISO 8859-1` encoding of `μ01` (`Greek Small Letter Mu` + `version`, currently always 1)
+Payload: `B5 30 31` which is `ISO 8859-1` encoding of `μ01` (`Greek Small Letter Mu` + `version`, currently always 1)  
 Applies to: only appears at the beginning of file/stream once
 
 #### `0xFF` Padding
