@@ -2,10 +2,10 @@
 A compact and **simple** object notation. µ[mju:] stands for "micro".
 
 ```log
-File extension:   .mu
-MIME type:        application/muon
-Endianness:       little-endian
-Signature/Magic:  optional, 8F B5 30 31 ["�µ01"] @ 0x0
+File extension:     .mu
+MIME type:          application/muon
+Endianness:         little-endian
+Signature/Magic:    optional, 8F B5 30 31 ["�µ01"] @ 0x0
 ```
 
 Muon has some interesting  properties (see [**presentation**](https://bit.ly/muon-present) and [**docs**](./docs/README.md)):
