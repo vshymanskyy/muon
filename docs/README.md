@@ -141,3 +141,15 @@ For creating a deterministic Muon, follow the following rules:
 - **Tags:**
   - `count`,`size`,`padding` tags must **not** be used
   - magic tag `0x8F` must be ignored when comparing deterministic documents (i.e. may be present or missing)
+
+---
+
+## Muon Chaining
+
+Muon is entirely self-contained, so parser will decode one object at a time. Note that even if LRU strings list is used, the way it is referenced will still produces the correct result. Therefore, to decode multiple objects, you should repeatedly unpickle the file until you reach end of file or stream.
+
+For communication protocols, the following encoding is recommended:
+- the stream begins with  a Muon `magic` tag  and `0x90` (start list)
+- then a bunch of objects are sent one after another (decoder is called in a loop)
+- `0xFF` (padding) can be used as a keepalive signal
+- `0x91` (list end) is an explicit end of stream, after which connection should be cleanly terminated
