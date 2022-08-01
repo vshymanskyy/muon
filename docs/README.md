@@ -146,10 +146,11 @@ For creating a deterministic Muon, follow the following rules:
 
 ## CHAINING
 
-Muon is entirely self-contained, so decoder will read one object at a time. Note that even if LRU strings list is used, the way it is referenced still produces the correct result. Therefore, to decode multiple objects, you should repeatedly call a decoder until you reach end of file or stream.
+Muon is entirely self-contained, so decoder will read one object at a time. Even if LRU strings list is used, the way it is referenced still produces the correct result. Therefore, to decode multiple objects, you should repeatedly call a decoder until you reach end of file or stream.
 
 For communication protocols, the following encoding is recommended:
 - the stream begins with  a Muon `magic` tag  and `0x90` (start list)
 - then a bunch of objects are sent one after another (decoder is called in a loop)
 - `0xFF` (padding) can be used as a keepalive signal
 - `0x91` (list end) is an explicit end of stream, after which connection should be cleanly terminated
+
