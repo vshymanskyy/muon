@@ -1,6 +1,8 @@
 # µON [muon]
 A compact and **simple** object notation. µ[mju:] stands for "micro".
 
+[![Muon on Twitter](https://img.shields.io/static/v1?label=%C2%B5ON&message=on%20twitter&color=00acee&logo=twitter)](https://twitter.com/search?q=%C2%B5ON&f=live)
+
 ```log
 File extension:     .mu
 MIME type:          application/muon
@@ -37,7 +39,7 @@ Run benchmarks:
 
 ## Muon structure
 
-[![alt tag](docs/muon.png?raw=true)](https://bit.ly/muon-present)
+[![Muon diagram](docs/muon.png?raw=true)](https://bit.ly/muon-present)
 
 See more [**in documentation**](./docs/README.md).
 
