@@ -15,7 +15,7 @@ Muon has some interesting  properties (see [**presentation**](https://bit.ly/muo
 - **Compact** (~10..50% smaller than `JSON`). On par or outperforms `CBOR`, `MsgPack`, `UBJSON`
 - **Unlimited** size of objects and values
 - Data is ready to be used **in-place** without pre-processing
-- Supports **raw binary** data (`TypedArrays`)
+- Supports **raw binary** data (values and `TypedArrays`)
 - Can _optionally_ contain count of elements (and size in bytes) of all structures for efficient document processing, similar to `BSON`
 
 Future goals:
