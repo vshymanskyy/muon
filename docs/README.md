@@ -146,7 +146,7 @@ For creating a deterministic Muon, follow the following rules:
 
 ## Muon Chaining
 
-Muon is entirely self-contained, so parser will decode one object at a time. Note that even if LRU strings list is used, the way it is referenced will still produces the correct result. Therefore, to decode multiple objects, you should repeatedly unpickle the file until you reach end of file or stream.
+Muon is entirely self-contained, so decoder will read one object at a time. Note that even if LRU strings list is used, the way it is referenced still produces the correct result. Therefore, to decode multiple objects, you should repeatedly call a decoder until you reach end of file or stream.
 
 For communication protocols, the following encoding is recommended:
 - the stream begins with  a Muon `magic` tag  and `0x90` (start list)
