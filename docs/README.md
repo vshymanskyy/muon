@@ -1,6 +1,6 @@
 This document mostly contains some details omitted from the [**original presentation**](https://bit.ly/muon-present)
 
-## Muon types
+## TYPES
 
 - Primitive:
   - **String**
@@ -62,7 +62,7 @@ A sequence of arbitrary Muon objects
 
 ---
 
-## Muon tags
+## TAGS
 
 #### `0x8A` Count
 
@@ -107,7 +107,7 @@ Applies to: anything
 
 ---
 
-## Deterministic Encoding
+## DETERMINISTIC ENCODING
 
 Muon Encoder can optimize it's output, selecting from multiple available encoding for the same value.  
 Sometimes, it's desired to have a deterministic encoding, where the same structure maps to the same binary output.  
@@ -144,7 +144,7 @@ For creating a deterministic Muon, follow the following rules:
 
 ---
 
-## Muon Chaining
+## CHAINING
 
 Muon is entirely self-contained, so decoder will read one object at a time. Note that even if LRU strings list is used, the way it is referenced still produces the correct result. Therefore, to decode multiple objects, you should repeatedly call a decoder until you reach end of file or stream.
 
