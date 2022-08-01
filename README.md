@@ -1,22 +1,22 @@
-# muon
+# µON [muon]
 A compact and **simple** object notation. µ[mju:] stands for "micro".
 
 ```log
-File extension:   .mu
-MIME type:        application/muon
-Endianness:       little-endian
-Signature/Magic:  optional, 8F B5 30 31 ["�µ01"] @ 0x0
+File extension:     .mu
+MIME type:          application/muon
+Endianness:         little-endian
+Signature/Magic:    optional, 8F B5 30 31 ["�µ01"] @ 0x0
 ```
 
 Muon has some interesting  properties (see [**presentation**](https://bit.ly/muon-present) and [**docs**](./docs/README.md)):
 - Every null-terminated `UTF8` string is also a valid `muon` object
 - Gaps in the `UTF8` encoding space are used to encode things like `[` `]` `{` `}` etc.
-- Muon is self-describing and schemaless, just like `JSON` (unlike `Protobuf` and `FlatBuffers`)
-- Compact (~10..50% smaller than `JSON`). On par or outperforms `CBOR`, `MsgPack`, `UBJSON`
-- Unlimited size of objects and values
-- Data is ready to be used in-place without pre-processing
-- Supports raw binary values and `TypedArrays`
-- Optionally, can contain count of elements (and size in bytes) of all structures for efficient document processing, like `BSON`
+- Muon is **self-describing and schemaless**, just like `JSON` (unlike `Protobuf` and `FlatBuffers`)
+- **Compact** (~10..50% smaller than `JSON`). On par or outperforms `CBOR`, `MsgPack`, `UBJSON`
+- **Unlimited** size of objects and values
+- Data is ready to be used **in-place** without pre-processing
+- Supports **raw binary** data (values and `TypedArrays`)
+- Can _optionally_ contain count of elements (and size in bytes) of all structures for efficient document processing, similar to `BSON`
 
 Future goals:
 - Strict specification (little or no room for implementation-specific behavior / vendor-specific extensions)
