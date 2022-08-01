@@ -1,4 +1,4 @@
-# muon
+# µON [muon]
 A compact and **simple** object notation. µ[mju:] stands for "micro".
 
 ```log
