@@ -1,9 +1,8 @@
 import io
-import base64
-import re
 import array
+import typing
+import struct
 
-import leb128, struct
 from collections.abc import Mapping, Sequence
 from collections import deque, Counter
 
@@ -35,6 +34,67 @@ class DictBuilder:
         res = filter(lambda x: x[1] > 6, self._count.most_common())
         return list(map(lambda x: x[0], res))[0:size]
 
+"""
+Integer encoding
+"""
+
+def uleb128encode(x: int) -> bytearray:
+    assert x >= 0
+    r = []
+    while True:
+        byte = x & 0x7f
+        x = x >> 7
+        if x == 0:
+            r.append(byte)
+            return bytearray(r)
+        r.append(0x80 | byte)
+
+def uleb128decode(b: bytearray) -> int:
+    r = 0
+    for x, e in enumerate(b):
+        r = r + ((e & 0x7f) << (x * 7))
+    return r
+
+def uleb128decode_io(r: typing.BinaryIO) -> int:
+    a = bytearray()
+    while True:
+        b = ord(r.read(1))
+        a.append(b)
+        if (b & 0x80) == 0:
+            break
+    return uleb128decode(a)
+
+def sleb128encode(i: int) -> bytearray:
+    r = []
+    while True:
+        byte = i & 0x7f
+        i = i >> 7
+        if (i == 0 and byte & 0x40 == 0) or (i == -1 and byte & 0x40 != 0):
+            r.append(byte)
+            return bytearray(r)
+        r.append(0x80 | byte)
+
+def sleb128decode(b: bytearray) -> int:
+    r = 0
+    for i, e in enumerate(b):
+        r = r + ((e & 0x7f) << (i * 7))
+    if e & 0x40 != 0:
+        r |= - (1 << (i * 7) + 7)
+    return r
+
+def sleb128decode_io(r: typing.BinaryIO) -> int:
+    a = bytearray()
+    while True:
+        b = ord(r.read(1))
+        a.append(b)
+        if (b & 0x80) == 0:
+            break
+    return sleb128decode(a)
+
+"""
+Array helpers
+"""
+
 def detect_array_type(arr):
     if len(arr) < 3:
           return None
@@ -57,8 +117,37 @@ def detect_array_type(arr):
             return None
     return res
 
-def optimize_json(data):
-    return data
+def get_array_type_code(t):
+    if   t == 0xB0: return 'b'
+    elif t == 0xB1: return 'h'
+    elif t == 0xB2: return 'l'
+    elif t == 0xB3: return 'q'
+
+    elif t == 0xB4: return 'B'
+    elif t == 0xB5: return 'H'
+    elif t == 0xB6: return 'L'
+    elif t == 0xB7: return 'Q'
+
+    elif t == 0xB8: return None # f16
+    elif t == 0xB9: return 'f'
+    elif t == 0xBA: return 'd'
+
+def get_typed_array_marker(t):
+    if   t == 'b': return 0xB0
+    elif t == 'h': return 0xB1
+    elif t == 'l': return 0xB2
+    elif t == 'q': return 0xB3
+
+    elif t == 'B': return 0xB4
+    elif t == 'H': return 0xB5
+    elif t == 'L': return 0xB6
+    elif t == 'Q': return 0xB7
+
+    elif t == 'd': return 0xB9
+
+"""
+Muon formatter and parser
+"""
 
 class Writer:
     def __init__(self, out):
@@ -91,7 +180,7 @@ class Writer:
             if val >= 0 and val <= 9:
                 self.out.write(bytes([0xA0 + val]))
             else:
-                self.out.write(b'\xBB' + leb128.i.encode(int(val)))
+                self.out.write(b'\xBB' + sleb128encode(val))
         elif isinstance(val, float):
             try:
                 f16 = struct.pack('<e', val)
@@ -115,7 +204,7 @@ class Writer:
         elif isinstance(val, array.array):
             code = get_typed_array_marker(val.typecode)
             self.out.write(b'\x84' + struct.pack("<B", code))
-            self.out.write(leb128.u.encode(len(val)))
+            self.out.write(uleb128encode(len(val)))
             self.out.write(val.tobytes())
         elif isinstance(val, Sequence):
             if self.detect_arrays:
@@ -125,7 +214,7 @@ class Writer:
                         res = array.array(code, val)
                         code = get_typed_array_marker(code)
                         self.out.write(b'\x84' + bytes([code]))
-                        self.out.write(leb128.u.encode(len(res)))
+                        self.out.write(uleb128encode(len(res)))
                         res.tofile(self.out)
                         return
                     except:
@@ -135,14 +224,14 @@ class Writer:
                 if t == 'int':
                     #print(f"Detected array int[{len(val)}]")
                     self.out.write(b'\x84\xBB')
-                    self.out.write(leb128.u.encode(len(val)))
+                    self.out.write(uleb128encode(len(val)))
                     for v in val:
-                        self.out.write(leb128.i.encode(v))
+                        self.out.write(sleb128encode(v))
                     return
                 elif t == 'float':
                     #print(f"Detected array float[{len(val)}]")
                     self.out.write(b'\x84\xBA')
-                    self.out.write(leb128.u.encode(len(val)))
+                    self.out.write(uleb128encode(len(val)))
                     for v in val:
                         self.out.write(struct.pack('<d', v))
                     return
@@ -166,57 +255,15 @@ class Writer:
         val = str(val)
         strlen = len(val)
 
-
-        """ TODO: move this to a separate lint/optimization step
-        if self.detect_numstr:
-            if not val.startswith('0'):
-                try:
-                    self.add(int(val))
-                    return
-                except:
-                    pass
-
-            if strlen > 8:
-                try:
-                    self.add(float(val))
-                    return
-                except:
-                    pass
-
-
-        if self.detect_binary and not bool(re.search('\s', val)):
-            tmp = None
-
-            if tmp == None and (strlen == 32 or strlen == 40 or strlen >= 64):
-                try:
-                    tmp = bytes.fromhex(val)
-                    #print(f"Detected hex: {val}")
-                except:
-                    pass
-
-            if tmp == None and strlen >= 32 and val.endswith('='):
-                try:
-                    tmp = base64.b64decode(val)
-                    #print(f"Detected base64: {val}")
-                except:
-                    pass
-
-            if not tmp == None:
-                self.out.write(b'\x84\xB4')
-                self.out.write(leb128.u.encode(len(tmp)))
-                self.out.write(tmp)
-                return
-        """
-
         if val in self.lru:
             idx = len(self.lru) - self.lru.index(val) - 1
             #print (f"Found {val} at LRU {idx}")
-            self.out.write(b'\x81' + leb128.u.encode(idx))
+            self.out.write(b'\x81' + uleb128encode(idx))
         else:
             buff = val.encode('utf8')
             if b'\x00' in buff:         # TODO: or len(buff) >= 512
                 self.out.write(b'\x82')
-                self.out.write(leb128.u.encode(len(buff)))
+                self.out.write(uleb128encode(len(buff)))
                 self.out.write(buff)
             else:
                 self.out.write(buff + b'\x00')
@@ -225,34 +272,6 @@ class Writer:
     def end_list(self):           self.out.write(b'\x91')
     def start_dict(self):         self.out.write(b'\x92')
     def end_dict(self):           self.out.write(b'\x93')
-
-def get_array_type_code(t):
-    if   t == 0xB0: return 'b'
-    elif t == 0xB1: return 'h'
-    elif t == 0xB2: return 'l'
-    elif t == 0xB3: return 'q'
-
-    elif t == 0xB4: return 'B'
-    elif t == 0xB5: return 'H'
-    elif t == 0xB6: return 'L'
-    elif t == 0xB7: return 'Q'
-
-    elif t == 0xB8: return None # f16
-    elif t == 0xB9: return 'f'
-    elif t == 0xBA: return 'd'
-
-def get_typed_array_marker(t):
-    if   t == 'b': return 0xB0
-    elif t == 'h': return 0xB1
-    elif t == 'l': return 0xB2
-    elif t == 'q': return 0xB3
-
-    elif t == 'B': return 0xB4
-    elif t == 'H': return 0xB5
-    elif t == 'L': return 0xB6
-    elif t == 'Q': return 0xB7
-
-    elif t == 'd': return 0xB9
 
 class Reader:
     def __init__(self, inp):
@@ -268,10 +287,10 @@ class Reader:
     def read_string(self):
         c = self.inp.read(1)
         if c == b'\x81':
-            n, _ = leb128.u.decode_reader(self.inp)
+            n = uleb128decode_io(self.inp)
             return self.lru[-1-n]
         elif c == b'\x82':
-            n, _ = leb128.u.decode_reader(self.inp)
+            n = uleb128decode_io(self.inp)
             return self.inp.read(n).decode('utf8')
         else:
             # read until 0
@@ -299,7 +318,7 @@ class Reader:
         elif t == 0xB8:
             return struct.unpack('<e', self.inp.read(2))[0]
         elif t == 0xBB:
-            n, _ = leb128.i.decode_reader(self.inp)
+            n = sleb128decode_io(self.inp)
             return n
         else:
             raise Exception(f"Unknown typed value: {t}")
@@ -307,11 +326,11 @@ class Reader:
     def read_typed_array(self):
         chunked = (self.inp.read(1) == b'\x85')
         t = self.inp.read(1)[0]
-        n, _ = leb128.u.decode_reader(self.inp)
+        n = uleb128decode_io(self.inp)
         if t == 0xBB:
             res = []
             for i in range(0, n):
-                val, _ = leb128.i.decode_reader(self.inp)
+                val = sleb128decode_io(self.inp)
                 res.append(val)
             return res
         else:
