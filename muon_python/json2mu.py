@@ -22,23 +22,15 @@ else:
 print("Generating MuON")
 
 if ofn.endswith(".hs"):
-    from heatshrink2.streams import HeatshrinkFile
-
-    window = 10
-    lookahead = 4
-
-    rawf = open(ofn, 'wb')
-    rawf.write(b'H$' + bytes([(window << 4) | lookahead]))
-
-    f = HeatshrinkFile(rawf, 'wb',
-                       window_sz2    = window,
-                       lookahead_sz2 = lookahead)
-
+    import hsfile
+    f = hsfile.open(ofn, "wb")
 else:
-    f = open(ofn, 'wb')
+    f = open(ofn, "wb")
 
-muon = muon.Writer(f)
-#muon.tag_muon()
-if len(t):
-    muon.add_lru_list(reversed(t))
-muon.add(data)
+m = muon.Writer(f)
+m.tag_muon()
+if len(t) > 128:
+    m.add_lru_list(reversed(t))
+elif len(t):
+    m.add_lru_dynamic(t)
+m.add(data)

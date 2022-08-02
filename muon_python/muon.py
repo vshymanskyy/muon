@@ -1,8 +1,4 @@
-import io
-import array
-import typing
-import struct
-
+import io, struct, array, typing
 from collections.abc import Mapping, Sequence
 from collections import deque, Counter
 
@@ -56,7 +52,7 @@ def uleb128decode(b: bytearray) -> int:
         r = r + ((e & 0x7f) << (x * 7))
     return r
 
-def uleb128decode_io(r: typing.BinaryIO) -> int:
+def uleb128read(r: typing.BinaryIO) -> int:
     a = bytearray()
     while True:
         b = ord(r.read(1))
@@ -83,7 +79,7 @@ def sleb128decode(b: bytearray) -> int:
         r |= - (1 << (i * 7) + 7)
     return r
 
-def sleb128decode_io(r: typing.BinaryIO) -> int:
+def sleb128read(r: typing.BinaryIO) -> int:
     a = bytearray()
     while True:
         b = ord(r.read(1))
@@ -150,6 +146,8 @@ def get_typed_array_marker(t):
 Muon formatter and parser
 """
 
+MUON_MAGIC = b'\x8F\xB5\x30\x31'
+
 class Writer:
     def __init__(self, out):
         self.out = out
@@ -159,7 +157,7 @@ class Writer:
         self.detect_arrays = True
 
     def tag_muon(self):
-        self.out.write(b'\x8F\xB5\x30\x31')
+        self.out.write(MUON_MAGIC)
 
     def add_lru_dynamic(self, table):
         self.lru_dynamic.extend(list(table))
@@ -287,11 +285,12 @@ class Writer:
 
 class Reader:
     def __init__(self, inp):
+        if isinstance(inp, bytes):
+            inp = io.BytesIO(inp)
+        if not isinstance(inp, io.BufferedReader):
+            inp = io.BufferedReader(inp)
+        self.inp = inp
         self.lru = deque()
-        if isinstance(inp, io.BufferedReader):
-            self.inp = inp
-        else:
-            self.inp = io.BufferedReader(inp)
 
     def peek_byte(self):
         return self.inp.peek(1)[0]
@@ -299,18 +298,19 @@ class Reader:
     def read_string(self):
         c = self.inp.read(1)
         if c == b'\x81':
-            n = uleb128decode_io(self.inp)
-            return self.lru[-1-n]
+            n = uleb128read(self.inp)
+            res = self.lru[-1-n]
         elif c == b'\x82':
-            n = uleb128decode_io(self.inp)
-            return self.inp.read(n).decode('utf8')
+            n = uleb128read(self.inp)
+            res = self.inp.read(n).decode('utf8')
         else:
             # read until 0
             buff = b''
             while not c == b'\x00':
                 buff += c
                 c = self.inp.read(1)
-            return buff.decode('utf8')
+            res = buff.decode('utf8')
+        return res
 
     def read_special(self):
         t = self.inp.read(1)[0]
@@ -331,7 +331,7 @@ class Reader:
         elif t == 0xB8:
             res = struct.unpack('<e', self.inp.read(2))[0]
         elif t == 0xBB:
-            res = sleb128decode_io(self.inp)
+            res = sleb128read(self.inp)
         else:
             raise Exception(f"Unknown typed value: {t}")
         return res
@@ -339,11 +339,11 @@ class Reader:
     def read_typed_array(self):
         chunked = (self.inp.read(1) == b'\x85')
         t = self.inp.read(1)[0]
-        n = uleb128decode_io(self.inp)
+        n = uleb128read(self.inp)
         if t == 0xBB:
             res = []
             for i in range(0, n):
-                val = sleb128decode_io(self.inp)
+                val = sleb128read(self.inp)
                 res.append(val)
             return res
         else:
@@ -355,7 +355,7 @@ class Reader:
 
     def read_list(self):
         res = []
-        assert(self.inp.read(1) == b'\x90')
+        assert self.inp.read(1) == b'\x90'
         while not self.peek_byte() == 0x91:
             res.append(self.read_object())
         self.inp.read(1)
@@ -363,7 +363,7 @@ class Reader:
 
     def read_dict(self):
         res = {}
-        assert(self.inp.read(1) == b'\x92')
+        assert self.inp.read(1) == b'\x92'
         # TODO: typed dict
         while not self.peek_byte() == 0x93:
             key = self.read_object()
@@ -394,6 +394,9 @@ class Reader:
                     return self.read_object()
                 else:
                     raise Exception(f"0x8C tag appied to {res}")
+            elif nxt == 0x8F:
+                assert self.inp.read(4) == MUON_MAGIC
+                return self.read_object()
             elif nxt == 0x90:
                 return self.read_list()
             elif nxt == 0x92:
