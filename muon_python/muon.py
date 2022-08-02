@@ -1,8 +1,9 @@
-import io, struct, array, typing
+import sys, io, struct, array, typing
 from collections.abc import Mapping, Sequence
 from collections import deque, Counter
 
 MUON_MAGIC = b'\x8F\xB5\x30\x31'
+BIG_ENDIAN = sys.byteorder == "big"
 
 class DictBuilder:
     def __init__(self):
@@ -139,9 +140,9 @@ def get_array_type_code(t):
     elif t == 0xB6: return 'L'
     elif t == 0xB7: return 'Q'
 
-    elif t == 0xB8: return None # f16
     elif t == 0xB9: return 'f'
     elif t == 0xBA: return 'd'
+    else: raise Exception(f"No array type for {hex(t)}")
 
 def get_typed_array_marker(t):
     if   t == 'b': return 0xB0
@@ -154,7 +155,9 @@ def get_typed_array_marker(t):
     elif t == 'L': return 0xB6
     elif t == 'Q': return 0xB7
 
-    elif t == 'd': return 0xB9
+    elif t == 'f': return 0xB9
+    elif t == 'd': return 0xBA
+    else: raise Exception(f"No encoding for array '{t}'")
 
 """
 Muon formatter and parser
@@ -218,9 +221,12 @@ class Writer:
             self.out.write(b'\xBA' + struct.pack('<d', val))
         elif isinstance(val, array.array):
             code = get_typed_array_marker(val.typecode)
-            self.out.write(b'\x84' + struct.pack("<B", code))
+            self.out.write(bytes([0x84, code]))
             self.out.write(uleb128encode(len(val)))
-            self.out.write(val.tobytes())
+            if BIG_ENDIAN:
+                val = array.array(val.typecode, val)
+                val.byteswap()
+            val.tofile(self.out)
         elif isinstance(val, Sequence):
             if self.detect_arrays:
                 """
@@ -228,7 +234,7 @@ class Writer:
                     try:
                         res = array.array(code, val)
                         code = get_typed_array_marker(code)
-                        self.out.write(b'\x84' + bytes([code]))
+                        self.out.write(bytes([0x84, code]))
                         self.out.write(uleb128encode(len(res)))
                         res.tofile(self.out)
                         return
@@ -244,11 +250,7 @@ class Writer:
                         self.out.write(sleb128encode(v))
                     return
                 elif t == 'float':
-                    #print(f"Detected array float[{len(val)}]")
-                    self.out.write(b'\x84\xBA')
-                    self.out.write(uleb128encode(len(val)))
-                    for v in val:
-                        self.out.write(struct.pack('<d', v))
+                    self.add(array.array('d', val))
                     return
 
             self.start_list()
@@ -283,7 +285,7 @@ class Writer:
                 self.out.write(b'\x8C')
 
             buff = val.encode('utf8')
-            if b'\x00' in buff:         # TODO: or len(buff) >= 512
+            if b'\x00' in buff or len(buff) > 512:
                 self.out.write(b'\x82')
                 self.out.write(uleb128encode(len(buff)))
                 self.out.write(buff)
@@ -361,8 +363,9 @@ class Reader:
         else:
             code = get_array_type_code(t)
             res = array.array(code)
-            # TODO: use struct here to ensure Little-Endian byte order
             res.fromfile(self.inp, n)
+            if BIG_ENDIAN:
+                res.byteswap()
             return res.tolist()
 
     def read_list(self):
