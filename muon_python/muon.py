@@ -26,11 +26,23 @@ class DictBuilder:
             self._count.update([val])
 
     # TODO: calculate static and dynamic LRU strings separately
+
+    """
+    static LRU requires:
+      3 bytes once +
+        2+ bytes for each occurance
+
+    dynamic LRU requires:
+      1 bytes for first occurance
+      2+ bytes for the rest
+
+    """
+
     def get_dict(self, size = 64):
         for k, v in self._count.items():
             self._count[k] = (v-1) * len(k)
 
-        res = filter(lambda x: x[1] > 6, self._count.most_common())
+        res = filter(lambda x: x[1] > 5, self._count.most_common())
         return list(map(lambda x: x[0], res))[0:size]
 
 """
@@ -410,14 +422,14 @@ def dumps(data, refs=0):
     if refs:
         d = DictBuilder()
         d.add(data)
-        t = d.get_dict(None)
+        t = d.get_dict(512)
     else:
         t = []
 
     out = io.BytesIO()
     m = Writer(out)
     #m.tag_muon()
-    if len(t) > 128:
+    if len(t) > 127:
         m.add_lru_list(reversed(t))
     elif len(t):
         m.add_lru_dynamic(t)
