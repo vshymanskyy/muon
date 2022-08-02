@@ -27,6 +27,7 @@ class DictBuilder:
         if len(val) > 1:
             self._count.update([val])
 
+    # TODO: calculate static and dynamic LRU strings separately
     def get_dict(self, size = 64):
         for k, v in self._count.items():
             self._count[k] = (v-1) * len(k)
@@ -153,11 +154,15 @@ class Writer:
     def __init__(self, out):
         self.out = out
         self.lru = deque(maxlen=512)
+        self.lru_dynamic = []
 
         self.detect_arrays = True
 
     def tag_muon(self):
         self.out.write(b'\x8F\xB5\x30\x31')
+
+    def add_lru_dynamic(self, table):
+        self.lru_dynamic.extend(list(table))
 
     def add_lru_list(self, table):
         table = list(table)
@@ -260,6 +265,13 @@ class Writer:
             #print (f"Found {val} at LRU {idx}")
             self.out.write(b'\x81' + uleb128encode(idx))
         else:
+            if val in self.lru_dynamic:
+                # Move from dynamic LRU to active
+                self.lru.append(val)
+                self.lru_dynamic.remove(val)
+                # Prepend LRU tag
+                self.out.write(b'\x8C')
+
             buff = val.encode('utf8')
             if b'\x00' in buff:         # TODO: or len(buff) >= 512
                 self.out.write(b'\x82')
@@ -302,26 +314,27 @@ class Reader:
 
     def read_special(self):
         t = self.inp.read(1)[0]
-        if   t == 0xAA:               return False
-        elif t == 0xAB:               return True
-        elif t == 0xAC:               return None
-        elif t >= 0xA0 and t <= 0xA9: return t-0xA0
+        if   t == 0xAA:               res = False
+        elif t == 0xAB:               res = True
+        elif t == 0xAC:               res = None
+        elif t >= 0xA0 and t <= 0xA9: res = t-0xA0
         else:
             raise Exception(f"Wrong special value: {t}")
+        return res
 
     def read_typed_value(self):
         t = self.inp.read(1)[0]
         if t == 0xBA:
-            return struct.unpack('<d', self.inp.read(8))[0]
+            res = struct.unpack('<d', self.inp.read(8))[0]
         elif t == 0xB9:
-            return struct.unpack('<f', self.inp.read(4))[0]
+            res = struct.unpack('<f', self.inp.read(4))[0]
         elif t == 0xB8:
-            return struct.unpack('<e', self.inp.read(2))[0]
+            res = struct.unpack('<e', self.inp.read(2))[0]
         elif t == 0xBB:
-            n = sleb128decode_io(self.inp)
-            return n
+            res = sleb128decode_io(self.inp)
         else:
             raise Exception(f"Unknown typed value: {t}")
+        return res
 
     def read_typed_array(self):
         chunked = (self.inp.read(1) == b'\x85')
@@ -351,8 +364,9 @@ class Reader:
     def read_dict(self):
         res = {}
         assert(self.inp.read(1) == b'\x92')
+        # TODO: typed dict
         while not self.peek_byte() == 0x93:
-            key = self.read_string()
+            key = self.read_object()
             val = self.read_object()
             res[key] = val
         self.inp.read(1)
@@ -361,10 +375,8 @@ class Reader:
     def read_object(self):
         nxt = self.peek_byte()
 
-        if nxt > 0x81 and nxt <= 0xC1:
-            if nxt == 0x82:
-                return self.read_string()
-            elif nxt >= 0xA0 and nxt <= 0xAF:
+        if nxt > 0x82 and nxt <= 0xC1:
+            if nxt >= 0xA0 and nxt <= 0xAF:
                 return self.read_special()
             elif nxt >= 0xB0 and nxt <= 0xBB:
                 return self.read_typed_value()
@@ -372,8 +384,16 @@ class Reader:
                 return self.read_typed_array()
             elif nxt == 0x8C:
                 self.inp.read(1)
-                self.lru.extend(self.read_list())
-                return self.read_object()
+                res = self.read_object() # should be str or list
+                if isinstance(res, str):
+                    self.lru.append(res)
+                    return res
+                elif isinstance(res, list):
+                    self.lru.extend(res)
+                    # Read next object (LRU list is skipped)
+                    return self.read_object()
+                else:
+                    raise Exception(f"0x8C tag appied to {res}")
             elif nxt == 0x90:
                 return self.read_list()
             elif nxt == 0x92:
@@ -394,8 +414,10 @@ def dumps(data, refs=0):
     out = io.BytesIO()
     m = Writer(out)
     #m.tag_muon()
-    if len(t):
+    if len(t) > 128:
         m.add_lru_list(reversed(t))
+    elif len(t):
+        m.add_lru_dynamic(t)
     m.add(data)
     return out.getvalue()
 
