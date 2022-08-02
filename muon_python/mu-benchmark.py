@@ -63,6 +63,7 @@ encoders = {
 }
 
 compressors = {
+  None:     lambda data: data,
   #"zl":    lambda data: zlib.compress(data, level=9),
   "gz":     lambda data: gzip.compress(data, compresslevel=9),
   "bz2":    lambda data: bz2.compress(data, compresslevel=9),
@@ -72,10 +73,10 @@ compressors = {
   "hs":     lambda data: heatshrink2.compress(data, window_sz2=12, lookahead_sz2=5),
 }
 
-comprs = [None, 'gz'] # + list(compressors.keys())
+comprs = [None, 'gz', 'hs'] # list(compressors.keys())
+compr_csv = {}
 
 for compr in comprs:
-
     if compr:
         ofn = './results/mu-benchmark-' + compr + '.csv'
     else:
@@ -86,28 +87,35 @@ for compr in comprs:
     writer = csv.DictWriter(csvfile, fieldnames=cols)
     writer.writeheader()
 
-    for ifn in sys.argv[1:]:
-        print(ifn)
+    compr_csv[compr] = writer
 
-        with open(ifn) as f:
-            data = json.load(f)
-        data_size = len(encoders["JSON"](data))
+for ifn in sys.argv[1:]:
+    print(ifn)
 
-        row = {
+    with open(ifn) as f:
+        data = json.load(f)
+    data_size = len(encoders["JSON"](data))
+
+    row = {}
+    for compr in comprs:
+        row[compr] = {
             "": ifn.replace(".json", "").replace(".min", "").replace("./","").replace("data/","")
         }
 
-        for enc_name, enc_func in encoders.items():
-            try:
-                enc_data = enc_func(data)
+    for enc_name, enc_func in encoders.items():
+        try:
+            enc_data = enc_func(data)
 
-                if compr is not None:
-                    enc_data = compressors[compr](enc_data)
+            for compr in comprs:
+                compr_data = compressors[compr](enc_data)
 
-                size = len(enc_data)
+                size = len(compr_data)
 
-                row[enc_name] = "{:.2f}%".format((size*100) / data_size)
-            except Exception as e:
-                print(e)
+                row[compr][enc_name] = "{:.2f}%".format((size*100) / data_size)
 
-        writer.writerow(row)
+
+        except Exception as e:
+            print(e)
+
+    for compr in comprs:
+          compr_csv[compr].writerow(row[compr])
