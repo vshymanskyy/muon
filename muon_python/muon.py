@@ -399,16 +399,14 @@ class Reader:
                 return self.read_typed_array()
             elif nxt == 0x8C:
                 self.inp.read(1)
-                res = self.read_object() # should be str or list
-                if isinstance(res, str):
-                    self.lru.append(res)
-                    return res
-                elif isinstance(res, list):
-                    self.lru.extend(res)
+                if self.peek_byte() == 0x90:
+                    self.lru.extend(self.read_list())
                     # Read next object (LRU list is skipped)
                     return self.read_object()
                 else:
-                    raise Exception(f"0x8C tag appied to {res}")
+                    res = self.read_string()
+                    self.lru.append(res)
+                    return res
             elif nxt == 0x8F:
                 assert self.inp.read(4) == MUON_MAGIC
                 return self.read_object()
