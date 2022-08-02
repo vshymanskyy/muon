@@ -2,6 +2,8 @@ import io, struct, array, typing
 from collections.abc import Mapping, Sequence
 from collections import deque, Counter
 
+MUON_MAGIC = b'\x8F\xB5\x30\x31'
+
 class DictBuilder:
     def __init__(self):
         self._count = Counter()
@@ -145,8 +147,6 @@ def get_typed_array_marker(t):
 """
 Muon formatter and parser
 """
-
-MUON_MAGIC = b'\x8F\xB5\x30\x31'
 
 class Writer:
     def __init__(self, out):

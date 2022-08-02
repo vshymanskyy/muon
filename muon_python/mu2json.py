@@ -15,5 +15,5 @@ else:
 m = muon.Reader(f)
 data = m.read_object()
 
-json.dump(data, sys.stdout, indent=4)
+json.dump(data, sys.stdout, indent=2)
 print()
