@@ -67,15 +67,15 @@ A sequence of arbitrary Muon objects
 #### `0x8A` Count
 
 Specifies size of the following structure in **elements**.  
-This tag can optioanlly added to enable efficient resource allocation by the parser.
+This tag can optionally be added to enable parser optimizations.
 
 Payload: `LEB128`  
 Applies to: `Dict`, `List`
 
 #### `0x8B` Size
 
-Specifies size of the following structure in **bytes**.  
-This tag can optioanlly added to enable efficient parsing/filtering/scanning of the document.
+Specifies size of the following structure in **bytes** (excluding any tags applied to it).  
+This tag can optionally be added to enable optimized document scanning.
 
 Payload: `LEB128`  
 Applies to: `Dict`, `List`, `TypedArray`
