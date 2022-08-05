@@ -64,6 +64,8 @@ A sequence of arbitrary Muon objects
 
 ## TAGS
 
+Tags are encoded using a single byte (marked dark green), possibly followed by some payload. Multiple tags can be applied to an object.
+
 #### `0x8A` Count
 
 Specifies size of the following structure in **elements**.  
