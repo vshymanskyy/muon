@@ -1,5 +1,5 @@
 
-[![UTF8 unused code units](code-units.png?raw=true)](https://bit.ly/muon-present)
+<a href="https://bit.ly/muon-present" target="_blank">![UTF8 unused code units](code-units.png?raw=true)</a>
 
 **Note:** This document mostly contains some details omitted from the [**original presentation**](https://bit.ly/muon-present)
 
