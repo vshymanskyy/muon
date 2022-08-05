@@ -1,4 +1,7 @@
-This document mostly contains some details omitted from the [**original presentation**](https://bit.ly/muon-present)
+
+[![UTF8 unused code units](code-units.png?raw=true)](https://bit.ly/muon-present)
+
+**Note:** This document mostly contains some details omitted from the [**original presentation**](https://bit.ly/muon-present)
 
 ## TYPES
 
