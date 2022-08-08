@@ -227,6 +227,10 @@ class Writer:
                 val = array.array(val.typecode, val)
                 val.byteswap()
             val.tofile(self.out)
+        elif isinstance(val, bytes):
+            self.out.write(bytes([0x84, 0xB4]))
+            self.out.write(uleb128encode(len(val)))
+            self.out.write(val)
         elif isinstance(val, Sequence):
             if self.detect_arrays:
                 """

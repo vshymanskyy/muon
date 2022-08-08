@@ -22,7 +22,8 @@ if ofn.endswith(".hs"):
 else:
     f = open(ofn, 'wb')
 
-muon = muon.Writer(f) #table=["name","mode","regular","type","uid","gid","size"])
+muon = muon.Writer(f)
+muon.add_lru_list(["name","md5","sha256","data"])
 
 files = os.listdir(inp)
 files.sort()
@@ -37,7 +38,7 @@ for filename in files:
 
     import hashlib
 
-    muon.add_attr({
+    muon.add({
       "name": filename,
       "md5": hashlib.md5(data).hexdigest(),
       "sha256": hashlib.sha256(data).hexdigest(),
@@ -46,9 +47,8 @@ for filename in files:
       #"uid":  1,
       #"gid":  1,
       #"size": os.path.getsize(fn)
+      "data": data
     })
-    muon.add_binary(data)
-
 
 
 muon.end_list()
