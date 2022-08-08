@@ -205,7 +205,7 @@ class Writer:
                 if struct.unpack('<e', f16)[0] == val:
                     self.out.write(b'\xB8' + f16)
                     #print(f'Stored f16: {f16}')
-                    return
+                    return self
             except:
                 pass
 
@@ -214,7 +214,7 @@ class Writer:
                 if struct.unpack('<f', f32)[0] == val:
                     self.out.write(b'\xB9' + f32)
                     #print(f'Stored f32: {f32}')
-                    return
+                    return self
             except:
                 pass
 
@@ -241,7 +241,7 @@ class Writer:
                         self.out.write(bytes([0x84, code]))
                         self.out.write(uleb128encode(len(res)))
                         res.tofile(self.out)
-                        return
+                        return self
                     except:
                         pass
                 """
@@ -252,10 +252,10 @@ class Writer:
                     self.out.write(uleb128encode(len(val)))
                     for v in val:
                         self.out.write(sleb128encode(v))
-                    return
+                    return self
                 elif t == 'float':
                     self.add(array.array('d', val))
-                    return
+                    return self
 
             self.start_list()
             for v in val:
@@ -267,6 +267,8 @@ class Writer:
                 self.add_str(k)
                 self.add(v)
             self.end_dict()
+
+        return self
 
     """
     Low-level API
@@ -296,10 +298,14 @@ class Writer:
             else:
                 self.out.write(buff + b'\x00')
 
-    def start_list(self):         self.out.write(b'\x90')
-    def end_list(self):           self.out.write(b'\x91')
-    def start_dict(self):         self.out.write(b'\x92')
-    def end_dict(self):           self.out.write(b'\x93')
+    def _append(self, b):
+        self.out.write(b)
+        return self
+
+    def start_list(self):         return self._append(b'\x90')
+    def end_list(self):           return self._append(b'\x91')
+    def start_dict(self):         return self._append(b'\x92')
+    def end_dict(self):           return self._append(b'\x93')
 
 class Reader:
     def __init__(self, inp):
