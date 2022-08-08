@@ -25,6 +25,7 @@ else:
     f = open(ofn, 'wb')
 
 muon = muon.Writer(f)
+muon.tag_muon()
 muon.add_lru_dynamic(["name","md5","sha256","data","offset","size","owner","group","mtime","mode"])
 
 files = os.listdir(inp)
@@ -58,7 +59,7 @@ for filename in files:
         muon.add("mtime").add(int(path.stat().st_mtime))
         muon.add("owner").add(path.owner())
         muon.add("group").add(path.group())
-        muon.add("mode").add(path.stat().st_mode)
+        muon.add("mode").add(path.stat().st_mode & 0o777)
 
         ranges = sparse_ranges(src)
         #print(ranges)
