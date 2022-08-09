@@ -198,7 +198,31 @@ class Writer:
             if val >= 0 and val <= 9:
                 self.out.write(bytes([0xA0 + val]))
             else:
-                self.out.write(b'\xBB' + sleb128encode(val))
+                enc = sleb128encode(val)
+                lenc = len(enc)
+                if val < 0:
+                    if val >= -0x80:
+                        self.out.write(b'\xB0' + struct.pack('<b', val))
+                    elif val >= -0x8000 and lenc >= 2:
+                        self.out.write(b'\xB1' + struct.pack('<h', val))
+                    elif val >= -0x8000_0000 and lenc >= 4:
+                        self.out.write(b'\xB2' + struct.pack('<l', val))
+                    elif val >= -0x8000_0000_0000_0000 and lenc >= 8:
+                        self.out.write(b'\xB3' + struct.pack('<q', val))
+                    else:
+                        self.out.write(b'\xBB' + enc)
+                else:
+                    if val < 0x80:
+                        self.out.write(b'\xB4' + struct.pack('<B', val))
+                    elif val < 0x8000 and lenc >= 2:
+                        self.out.write(b'\xB5' + struct.pack('<H', val))
+                    elif val < 0x8000_0000 and lenc >= 4:
+                        self.out.write(b'\xB6' + struct.pack('<L', val))
+                    elif val < 0x8000_0000_0000_0000 and lenc >= 8:
+                        self.out.write(b'\xB7' + struct.pack('<Q', val))
+                    else:
+                        self.out.write(b'\xBB' + enc)
+
         elif isinstance(val, float):
             try:
                 f16 = struct.pack('<e', val)
@@ -348,12 +372,28 @@ class Reader:
 
     def read_typed_value(self):
         t = self.inp.read(1)[0]
-        if t == 0xBA:
-            res = struct.unpack('<d', self.inp.read(8))[0]
-        elif t == 0xB9:
-            res = struct.unpack('<f', self.inp.read(4))[0]
+        if   t == 0xB0:
+            res = struct.unpack('<b', self.inp.read(1))[0]
+        elif t == 0xB1:
+            res = struct.unpack('<h', self.inp.read(2))[0]
+        elif t == 0xB2:
+            res = struct.unpack('<l', self.inp.read(4))[0]
+        elif t == 0xB3:
+            res = struct.unpack('<q', self.inp.read(8))[0]
+        elif t == 0xB4:
+            res = struct.unpack('<B', self.inp.read(1))[0]
+        elif t == 0xB5:
+            res = struct.unpack('<H', self.inp.read(2))[0]
+        elif t == 0xB6:
+            res = struct.unpack('<L', self.inp.read(4))[0]
+        elif t == 0xB7:
+            res = struct.unpack('<Q', self.inp.read(8))[0]
         elif t == 0xB8:
             res = struct.unpack('<e', self.inp.read(2))[0]
+        elif t == 0xB9:
+            res = struct.unpack('<f', self.inp.read(4))[0]
+        elif t == 0xBA:
+            res = struct.unpack('<d', self.inp.read(8))[0]
         elif t == 0xBB:
             res = sleb128read(self.inp)
         else:
