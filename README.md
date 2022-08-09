@@ -26,14 +26,14 @@ Future goals:
 ## Try it yourself
 
 ```sh
-python3 muon_python/json2mu.py ./data/AirlineDelays.min.json ./AirlineDelays.mu
-python3 muon_python/mu2json.py ./AirlineDelays.mu > ./AirlineDelays.json
+python3 muon_py/json2mu.py ./data/AirlineDelays.min.json ./AirlineDelays.mu
+python3 muon_py/mu2json.py ./AirlineDelays.mu > ./AirlineDelays.json
 ```
 
 Run benchmarks:
 ```sh
-./muon_python/extra/json-analyze.py ./data/*.json ./data/small/*.json
-./muon_python/mu-benchmark.py ./data/*.json ./data/small/*.json
+python3 muon_py/extra/json-analyze.py ./data/*.json ./data/small/*.json
+python3 muon_py/mu-benchmark.py ./data/*.json ./data/small/*.json
 ```
 
 ## Muon structure
