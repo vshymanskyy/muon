@@ -101,7 +101,7 @@ Notes:
 Can be used at the start of a file or stream and allows the reader to [more reliably guess](https://en.wikipedia.org/wiki/List_of_file_signatures) that Muon format is used.
 
 Payload: `B5 30 31` which is `ISO 8859-1` encoding of `μ01` (`Greek Small Letter Mu` + `version`, currently always 1)  
-Applies to: only appears at the beginning of file/stream once
+Applies to: usually only appears at the beginning of file/stream, once. In case of concatenated/chained objects it can appear multiple times.
 
 #### `0xFF` Padding
 
@@ -151,12 +151,10 @@ For creating a deterministic Muon, follow the following rules:
 
 ## CHAINING
 
-Muon is entirely self-contained, so decoder will read one object at a time. Even if LRU strings list is used, the way it is referenced still produces the correct result. Therefore, to decode multiple concatenated objects, you should repeatedly call a decoder until you reach end of file or stream.
+Muon is entirely self-contained, so decoder will read one object at a time. Even if LRU strings list is used, the way it is referenced still produces the correct result. Therefore, to decode multiple concatenated objects, you should repeatedly call a decoder until you reach end of file or stream. Whenever possible, tools and libraries should provide ways of working with concatenated objects. If for any reason it makes no sense in a specific application context, any data (except padding tag `0xFF`) that follows the first root object should be treated as an error.
 
 For communication protocols, the following encoding is recommended:
 - stream begins with a Muon `magic` tag (recommended, optional) and `0x90` (start list)
 - then a bunch of objects are sent one after another (decoder is called in a loop)
 - `0xFF` (padding) can be used as a keepalive signal
 - `0x91` (list end) is an explicit end of stream, after which connection should be cleanly terminated
-
-Whenever possible, tools and libraries should provide ways of working with concatenated objects. If for any reason it makes no sense in a specific application context, any data that follows the first root object should be reported as an error.
