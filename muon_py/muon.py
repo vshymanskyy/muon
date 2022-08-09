@@ -488,6 +488,4 @@ def dumps(data, refs=0):
     return out.getvalue()
 
 def loads(data):
-    inp = io.BytesIO(data)
-    m = Reader(inp)
-    return m.read_object()
+    return Reader(data).read_object()
