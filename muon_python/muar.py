@@ -24,10 +24,6 @@ elif ofn.endswith(".xz"):
 else:
     f = open(ofn, 'wb')
 
-muon = muon.Writer(f)
-muon.tag_muon()
-muon.add_lru_dynamic(["name","md5","sha256","data","offset","size","owner","group","mtime","mode"])
-
 files = os.listdir(inp)
 files.sort()
 
@@ -46,36 +42,82 @@ def sparse_ranges(f):
             f.seek(cur)
             return ranges
 
+def is_sparse(ranges, filesize):
+    if len(ranges) == 1:
+        return ranges[0] != (0, filesize)
+    else:
+        return True
+
+def strip_zeros(offset, data):
+    # Find first non-zero byte
+    size = len(data)
+    fnz = 0
+    while fnz < size:
+        if data[fnz]: break
+        fnz += 1
+    else:
+        # Skip all-zeroes block
+        return (offset, [])
+
+    # Strip leading zeroes
+    data = data[fnz:size]
+    offset += fnz
+    size = len(data)
+
+    # Find last non-zero byte
+    while size > 0:
+        if data[size-1]: break
+        size -= 1
+
+    # Strip trailing zeroes
+    data = data[0:size]
+
+    return (offset, data)
+
+muon = muon.Writer(f)
+muon.tag_muon()
+muon.add_lru_dynamic([
+    "name","data","offset","size",
+    "owner","group","mtime","mode",
+    "md5","sha1","sha256"
+])
+
 muon.start_list()
 
 for filename in files:
     fn = os.path.join(inp, filename)
     path = Path(fn)
+    stat = path.stat()
+    filesize = stat.st_size
 
     with open(fn, "rb") as src:
-
         muon.start_dict()
         muon.add("name").add(filename)
-        muon.add("mtime").add(int(path.stat().st_mtime))
+        muon.add("mtime").add(int(stat.st_mtime))
         muon.add("owner").add(path.owner())
         muon.add("group").add(path.group())
-        muon.add("mode").add(path.stat().st_mode & 0o777)
+        muon.add("mode").add(stat.st_mode & 0o777)
 
         ranges = sparse_ranges(src)
-        #print(ranges)
-        if len(ranges) > 1:
+        #print(filename, ranges)
+        if is_sparse(ranges, filesize):
             # Sparse file detected
-            muon.add("size").add(path.stat().st_size)
+            muon.add("size").add(filesize)
             muon.add("data").start_list()
 
             for offset, size in ranges:
                 src.seek(offset)
                 data = src.read(size)
 
+                offset, data = strip_zeros(offset, data)
+                if not len(data):
+                    continue
+
                 muon.start_dict()
                 muon.add("offset").add(offset)
                 muon.add("md5").add(hashlib.md5(data).digest())
-                muon.add("sha256").add(hashlib.sha256(data).digest())
+                #muon.add("sha1").add(hashlib.sha1(data).digest())
+                #muon.add("sha256").add(hashlib.sha256(data).digest())
                 muon.add("data").add(data)
                 muon.end_dict()
 
@@ -85,8 +127,10 @@ for filename in files:
             data = src.read()
 
             muon.add("md5").add(hashlib.md5(data).digest())
-            muon.add("sha256").add(hashlib.sha256(data).digest())
+            #muon.add("sha1").add(hashlib.sha1(data).digest())
+            #muon.add("sha256").add(hashlib.sha256(data).digest())
             muon.add("data").add(data)
 
         muon.end_dict()
+
 muon.end_list()
