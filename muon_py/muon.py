@@ -338,7 +338,7 @@ class Writer:
                 self.out.write(b'\x8C')
 
             buff = val.encode('utf8')
-            if b'\x00' in buff or len(buff) > 512:
+            if b'\x00' in buff or len(buff) >= 512:
                 self.out.write(b'\x82')
                 self.out.write(uleb128encode(len(buff)))
                 self.out.write(buff)

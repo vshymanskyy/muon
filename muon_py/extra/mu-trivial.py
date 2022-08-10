@@ -9,7 +9,11 @@ class Writer:
 
     def add(self, val):
         if isinstance(val, str):
-            self.out.write(str(val).encode('utf8') + b'\x00')
+            buff = val.encode('utf8')
+            if b'\x00' in buff or len(buff) >= 512:
+                self.out.write(b'\x82' + uleb128encode(len(buff)) + buff)
+            else:
+                self.out.write(buff + b'\x00')
         elif val is None:
             self.out.write(b'\xAC')
         elif isinstance(val, bool):
@@ -18,7 +22,7 @@ class Writer:
             if val >= 0 and val <= 9:
                 self.out.write(bytes([0xA0 + val]))
             else:
-                self.out.write(b'\xBB' + leb128.i.encode(int(val)))
+                self.out.write(b'\xBB' + leb128.i.encode(val))
         elif isinstance(val, float):
             self.out.write(b'\xBA' + struct.pack('<d', val))
         elif isinstance(val, Sequence):
@@ -37,5 +41,4 @@ if __name__ == '__main__':
     import sys, json
     with open(sys.argv[1]) as f:
         data = json.load(f)
-    muon = Writer(sys.stdout.buffer)
-    muon.add(data)
+    Writer(sys.stdout.buffer).add(data)

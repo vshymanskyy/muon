@@ -18,7 +18,7 @@
 
 `0x81` reference to a string in an LRU list, counting from top  
 `0x82` fixed-length string. `len` is in **bytes**. Useful when encoding:
-- long strings (>512 bytes)
+- long strings (>=512 bytes)
 - strings that contain `null characters (0x00)`
 
 #### Integer
@@ -123,8 +123,8 @@ For creating a deterministic Muon, follow the following rules:
 - **String:**
   - must have a valid and deterministic encoding in UTF8 (out of scope for this document)
   - must be encoded as fixed-length if:
-    - longer than 512 bytes, or
-    - contains any `0x00` bytes
+    - length >= 512 bytes, or
+    - contains `0x00` bytes
   - string references:
     - `0x8C` tag must **not** be applied to any strings
     - `0x8C` tag can only apply to a single, static LRU list that apperas only once at the begining of the Muon document
