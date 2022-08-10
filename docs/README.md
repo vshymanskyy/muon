@@ -73,9 +73,10 @@ Tags are encoded using a single byte (marked dark green), possibly followed by s
 
 Specifies size of the following structure in **elements**.  
 This tag can optionally be added to enable parser optimizations.
+When applied to `String`, this tag indicates the count of unicode characters (not length in bytes).
 
 Payload: `LEB128`  
-Applies to: `Dict`, `List`
+Applies to: `Dict`, `List`, `String`
 
 #### `0x8B` Size
 
