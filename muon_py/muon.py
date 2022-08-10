@@ -1,4 +1,4 @@
-import sys, io, struct, array, typing
+import sys, io, math, struct, array, typing
 from collections.abc import Mapping, Sequence
 from collections import deque, Counter
 
@@ -108,7 +108,7 @@ Array helpers
 """
 
 def detect_array_type(arr):
-    if len(arr) < 3:
+    if len(arr) < 2:
           return None
 
     res = None
@@ -140,6 +140,7 @@ def get_array_type_code(t):
     elif t == 0xB6: return 'L'
     elif t == 0xB7: return 'Q'
 
+    elif t == 0xB8: raise Exception(f"TypedArray: f16 not supported")
     elif t == 0xB9: return 'f'
     elif t == 0xBA: return 'd'
     else: raise Exception(f"No array type for {hex(t)}")
@@ -173,9 +174,23 @@ class Writer:
 
     def tag_muon(self):
         self.out.write(MUON_MAGIC)
+        return self
+
+    def tag_pad(self, count=1):
+        self.out.write(b'\xFF' * count)
+        return self
+
+    def tag_count(self, count):
+        self.out.write(b'\x8A' + uleb128encode(count))
+        return self
+
+    def tag_size(self, size):
+        self.out.write(b'\x8B' + uleb128encode(size))
+        return self
 
     def add_lru_dynamic(self, table):
         self.lru_dynamic.extend(list(table))
+        return self
 
     def add_lru_list(self, table):
         table = list(table)
@@ -186,6 +201,7 @@ class Writer:
         for s in table:
             self.out.write(s.encode('utf8') + b'\x00')
         self.end_list()
+        return self
 
     def add(self, val):
         if isinstance(val, str):
@@ -224,6 +240,13 @@ class Writer:
                         self.out.write(b'\xBB' + enc)
 
         elif isinstance(val, float):
+            if math.isnan(val):
+                self.out.write(b'\xAD')
+                return self
+            if math.isinf(val):
+                self.out.write(b'\xAE' if val < 0 else b'\xAF')
+                return self
+
             try:
                 f16 = struct.pack('<e', val)
                 if struct.unpack('<e', f16)[0] == val:
@@ -343,6 +366,9 @@ class Reader:
     def peek_byte(self):
         return self.inp.peek(1)[0]
 
+    def has_data(self):
+        return len(self.inp.peek(1))
+
     def read_string(self):
         c = self.inp.read(1)
         if c == b'\x81':
@@ -365,6 +391,9 @@ class Reader:
         if   t == 0xAA:               res = False
         elif t == 0xAB:               res = True
         elif t == 0xAC:               res = None
+        elif t == 0xAD:               res =  math.nan
+        elif t == 0xAE:               res = -math.inf
+        elif t == 0xAF:               res =  math.inf
         elif t >= 0xA0 and t <= 0xA9: res = t-0xA0
         else:
             raise Exception(f"Wrong special value: {t}")
@@ -439,6 +468,10 @@ class Reader:
 
     def read_object(self):
         nxt = self.peek_byte()
+
+        while nxt == 0xFF:
+            self.inp.read(1)
+            nxt = self.peek_byte()
 
         if nxt > 0x82 and nxt <= 0xC1:
             if nxt >= 0xA0 and nxt <= 0xAF:
