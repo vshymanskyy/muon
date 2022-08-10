@@ -84,7 +84,7 @@ Specifies size of the following structure in **bytes** (excluding any tags appli
 This tag can optionally be added to enable optimized document scanning.
 
 Payload: `LEB128`  
-Applies to: `Dict`, `List`, `TypedArray`
+Applies to: `Dict`, `List`, chained `TypedArray`
 
 #### `0x8C` Referenced String
 
