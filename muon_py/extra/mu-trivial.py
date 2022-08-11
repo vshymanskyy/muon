@@ -11,7 +11,7 @@ class Writer:
         if isinstance(val, str):
             buff = val.encode('utf8')
             if b'\x00' in buff or len(buff) >= 512:
-                self.out.write(b'\x82' + uleb128encode(len(buff)) + buff)
+                self.out.write(b'\x82' + leb128.u.encode(len(buff)) + buff)
             else:
                 self.out.write(buff + b'\x00')
         elif val is None:
