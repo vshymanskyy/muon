@@ -16,10 +16,12 @@
 
 #### String
 
-`0x81` reference to a string in an LRU list, counting from top  
-`0x82` fixed-length string. `len` is in **bytes**. Useful when encoding:
+Regular strings are encoded in `UTF8`, null-terminated and without any prefix.  
+`0x81` is a reference to a string in an LRU list, counting from top.  
+Fixed-length strings are encoded using a `size` tag (`0x8B`) followed by a `UTF8` string (**not** null-terminated in this case).  
+Useful for encoding:
 - long strings (>=512 bytes)
-- strings that contain `null characters (0x00)`
+- strings that contain null characters (`0x00`)
 
 #### Integer
 
@@ -36,7 +38,7 @@
 ```c
 0xAA  False
 0xAB  True
-0xAC  Null/None
+0xAC  Null
 0xAD  NaN
 0xAE  -Inf
 0xAF  +Inf
@@ -84,7 +86,7 @@ Specifies size of the following structure in **bytes** (excluding any tags appli
 This tag can optionally be added to enable optimized document scanning.
 
 Payload: `LEB128`  
-Applies to: `Dict`, `List`
+Applies to: `String`, `Dict`, `List`
 
 #### `0x8C` Referenced String
 
@@ -146,8 +148,9 @@ For creating a deterministic Muon, follow the following rules:
   - is ordered
   - must preserve key type
 - **Tags:**
-  - `count`,`size`,`padding` tags must **not** be used
-  - magic tag `0x8F` must be ignored when comparing deterministic documents (i.e. may be present or missing)
+  - `count`, `padding` tags must **not** be used
+  - `size` tag can only be used for `Strings`
+  - `magic` tag can only appear once at the begginning (may be present or missing), and must be ignored when comparing deterministic documents
 
 ---
 
