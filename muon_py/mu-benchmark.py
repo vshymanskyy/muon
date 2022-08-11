@@ -2,6 +2,7 @@
 
 import sys, io, os
 import csv
+import array
 
 import json
 import bson
@@ -29,8 +30,15 @@ def pack_bson(data):
     except:
         return bson.dumps({'':data})
 
+class JsonEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, array.array):
+            return obj.tolist()
+
+        return json.JSONEncoder.default(self, obj)
+
 def ppjson(data):
-    return json.dumps(data, indent=4, sort_keys=True)
+    return json.dumps(data, indent=4, sort_keys=True, cls=JsonEncoder)
 
 def pack_muon(data, refs):
     orig_json = ppjson(data)

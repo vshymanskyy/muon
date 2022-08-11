@@ -66,14 +66,18 @@ if True:
     muon.add("u16").add(array('H',[0,1,2,3,4]))
     muon.add("u32").add(array('L',[0,1,2,3,4]))
     muon.add("u64").add(array('Q',[0,1,2,3,4]))
-    muon.add("f16").add("#TODO")
+    muon.add("f16").add_typed_array_f16([1.2,3.4,5.6])
     muon.add("f32").add(array('f',[1.2,3.4,5.6]))
     muon.add("f64").add(array('d',[1.2,3.4,5.6]))
     muon.add("leb128").add([
       -123456789123456789123456789,
        123456789123456789123456789
     ])
-    muon.add("chunked").add("#TODO")
+    if True:
+        muon.add("chunked").start_array(array('B',[0,1,2,3,4]), chunked=True)
+        muon.add_array_chunk(array('B',[5,6,7,8,9]))
+        muon.add_array_chunk(array('B',[10,11,12,13,14]))
+        muon.end_array_chunked()
     muon.end_dict()
 
 if True:
@@ -93,13 +97,17 @@ if True:
     muon.add("magic").tag_muon().add("should be skipped")
     if True:
         muon.add("pad before").start_list()
-        muon.tag_pad(4).add("padded")
-        muon.tag_pad(4).add("items")
+        muon.add_tagged("padded", pad=4)
+        muon.add_tagged("items", pad=4)
         muon.end_list()
 
-    muon.add("count").add("#TODO")
-    muon.add("size").add("#TODO")
-    muon.add("multiple tags").tag_muon().tag_pad(2).add("#TODO")
+    muon.add("count string").add_tagged("привіт", count=True)
+    muon.add("count list").add_tagged(["a","b","c"], count=True)
+    muon.add("count dict").add_tagged({"k1":"a", "k2":"b"}, count=True)
+    muon.add("size").add_tagged({"k1":"a", "k2":"b"}, size=True)
+
+    muon.add("multiple tags").tag_muon().add_tagged(
+        ["1","2","3"], pad=2, count=True, size=True)
 
     muon.end_dict()
 

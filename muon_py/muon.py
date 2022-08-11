@@ -176,16 +176,23 @@ class Writer:
         self.out.write(MUON_MAGIC)
         return self
 
-    def tag_pad(self, count=1):
-        self.out.write(b'\xFF' * count)
-        return self
+    def add_tagged(self, val, size=False, count=False, pad=0):
+        # encode to a temporary buffer
+        orig_out = self.out
+        try:
+            self.out = io.BytesIO()
+            self.add(val)
+            buf = self.out.getvalue()
+        finally:
+            self.out = orig_out
 
-    def tag_count(self, count):
-        self.out.write(b'\x8A' + uleb128encode(count))
-        return self
-
-    def tag_size(self, size):
-        self.out.write(b'\x8B' + uleb128encode(size))
+        if pad:
+            self.out.write(b'\xFF' * pad)
+        if count:
+            self.out.write(b'\x8A' + uleb128encode(len(val)))
+        if size:
+            self.out.write(b'\x8B' + uleb128encode(len(buf)))
+        self.out.write(buf)
         return self
 
     def add_lru_dynamic(self, table):
@@ -354,6 +361,29 @@ class Writer:
     def start_dict(self):         return self._append(b'\x92')
     def end_dict(self):           return self._append(b'\x93')
 
+    def start_array(self, val, chunked=False):
+        code = get_typed_array_marker(val.typecode)
+        self.out.write(bytes([0x85 if chunked else 0x84, code]))
+        return self.add_array_chunk(val)
+
+    def add_array_chunk(self, val):
+        self.out.write(uleb128encode(len(val)))
+        if BIG_ENDIAN:
+            val = array.array(val.typecode, val)
+            val.byteswap()
+        val.tofile(self.out)
+        return self
+
+    def end_array_chunked(self):
+        return self._append(b'\x00')
+
+    def add_typed_array_f16(self, val):
+        self.out.write(b'\x84\xB8')
+        self.out.write(uleb128encode(len(val)))
+        for v in val:
+            self.out.write(struct.pack('<e', v))
+        return self
+
 class Reader:
     def __init__(self, inp):
         if isinstance(inp, bytes):
@@ -432,20 +462,41 @@ class Reader:
     def read_typed_array(self):
         chunked = (self.inp.read(1) == b'\x85')
         t = self.inp.read(1)[0]
-        n = uleb128read(self.inp)
         if t == 0xBB:
             res = []
-            for i in range(0, n):
-                val = sleb128read(self.inp)
-                res.append(val)
-            return res
+            while True:
+                n = uleb128read(self.inp)
+                if not n: break
+
+                for i in range(0, n):
+                    val = sleb128read(self.inp)
+                    res.append(val)
+                if not chunked: return res
+        elif t == 0xB8:
+            # f16 format not supported for array.array, decode manually
+            res = []
+            while True:
+                n = uleb128read(self.inp)
+                if not n: break
+
+                for i in range(0, n):
+                    val = struct.unpack('<e', self.inp.read(2))[0]
+                    res.append(val)
+                if not chunked: return res
         else:
             code = get_array_type_code(t)
             res = array.array(code)
-            res.fromfile(self.inp, n)
-            if BIG_ENDIAN:
-                res.byteswap()
-            return res.tolist()
+            while True:
+                n = uleb128read(self.inp)
+                if not n: break
+
+                chunk = array.array(code)
+                chunk.fromfile(self.inp, n)
+                if BIG_ENDIAN:
+                    chunk.byteswap()
+                if not chunked: return chunk
+                res.extend(chunk)
+        return res
 
     def read_list(self):
         res = []
@@ -480,6 +531,14 @@ class Reader:
                 return self.read_typed_value()
             elif nxt == 0x84 or nxt == 0x85:
                 return self.read_typed_array()
+            elif nxt == 0x8A:
+                self.inp.read(1)
+                n = uleb128read(self.inp)
+                return self.read_object()
+            elif nxt == 0x8B:
+                self.inp.read(1)
+                n = uleb128read(self.inp)
+                return self.read_object()
             elif nxt == 0x8C:
                 self.inp.read(1)
                 if self.peek_byte() == 0x90:
