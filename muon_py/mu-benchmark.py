@@ -22,6 +22,8 @@ import lzma
 import brotli
 import heatshrink2
 
+from extra import mu_trivial
+
 validate = True
 
 def pack_bson(data):
@@ -54,6 +56,11 @@ def pack_muon(data, refs):
             print("Muon validation failed")
     return res
 
+def pack_trivial(data):
+    out = io.BytesIO()
+    mu_trivial.Writer(out).add(data)
+    return out.getvalue()
+
 encoders = {
   "BSON":       pack_bson,
   #"FlexBuf":    lambda data: flexbuffers.Dumps(data),
@@ -63,6 +70,7 @@ encoders = {
   #"Smile":     lambda data: pysmile.encode(data),
   #"pickle":     lambda data: pickle.dumps(data),
   #"marshal":    lambda data: marshal.dumps(data),
+  #"Muon trivial":  pack_trivial,
   "Muon":       lambda data: pack_muon(data, refs=False),
 
   "CBOR+refs":  lambda data: cbor2.dumps(data, string_referencing=True),
