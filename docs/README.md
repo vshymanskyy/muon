@@ -73,9 +73,10 @@ Tags are encoded using a single byte (marked dark green), possibly followed by s
 
 Specifies size of the following structure in **elements**.  
 This tag can optionally be added to enable parser optimizations.
+When applied to `String`, this tag indicates the count of unicode characters (not length in bytes).
 
 Payload: `LEB128`  
-Applies to: `Dict`, `List`
+Applies to: `Dict`, `List`, `String`
 
 #### `0x8B` Size
 
@@ -83,18 +84,19 @@ Specifies size of the following structure in **bytes** (excluding any tags appli
 This tag can optionally be added to enable optimized document scanning.
 
 Payload: `LEB128`  
-Applies to: `Dict`, `List`, `TypedArray`
+Applies to: `Dict`, `List`
 
 #### `0x8C` Referenced String
 
 Instructs that the following string needs to be added to the LRU string list.
 
-Payload: none  
+Payload: `none`  
 Applies to: `String`, `List`
 
 Notes:
-1. Once the list is full, items are discarded from the beginning
-2. If applied to a String Reference (type `0x81`), associated string is moved to the top of the LRU list
+1. LRU can have *at most* `512` items. Once the list is full, items are discarded from the beginning.
+3. `0x8C` can **not** be applied to a String Reference (`0x81`)
+4. Encoder should avoid adding the same string to an LRU list twice
 
 #### `0x8F` Muon Format Signature/Magic
 
@@ -107,14 +109,14 @@ Applies to: usually only appears at the beginning of file/stream, once. In case 
 
 Can be used to align the following value in memory, or as stream keep-alive signal.
 
-Payload: none  
+Payload: zero or more `0xFF` bytes  
 Applies to: anything
 
 ---
 
 ## DETERMINISTIC ENCODING
 
-Muon Encoder can optimize it's output, selecting from multiple available encoding for the same value.  
+Muon Encoder can optimize it's output, selecting from multiple available encodings for the same value.  
 Sometimes, it's desired to have a deterministic encoding, where the same structure maps to the same binary output.  
 Specificly, for deterministic muon: `muon_generate(muon_parse(original_bytes)) == original_bytes`.  
 
@@ -151,7 +153,7 @@ For creating a deterministic Muon, follow the following rules:
 
 ## CHAINING
 
-Muon is entirely self-contained, so decoder will read one object at a time. Even if LRU strings list is used, the way it is referenced still produces the correct result. Therefore, to decode multiple concatenated objects, you should repeatedly call a decoder until you reach end of file or stream. Whenever possible, tools and libraries should provide ways of working with concatenated objects. If for any reason it makes no sense in a specific application context, any data (except padding tag `0xFF`) that follows the first root object should be treated as an error.
+Muon is entirely self-contained, so decoder will read one object at a time. Therefore, to decode multiple concatenated objects, you should repeatedly call a decoder until you reach end of file or stream. Even if LRU strings list is used, the way it is referenced still produces the correct result. Whenever possible, tools and libraries should provide ways of working with concatenated objects. If for any reason it makes no sense in a specific application context, any data (except padding tag `0xFF`) that follows the first root object should be treated as an error.
 
 For communication protocols, the following encoding is recommended:
 - stream begins with a Muon `magic` tag (recommended, optional) and `0x90` (start list)
