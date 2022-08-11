@@ -84,18 +84,19 @@ Specifies size of the following structure in **bytes** (excluding any tags appli
 This tag can optionally be added to enable optimized document scanning.
 
 Payload: `LEB128`  
-Applies to: `Dict`, `List`, `chunked TypedArray`
+Applies to: `Dict`, `List`
 
 #### `0x8C` Referenced String
 
 Instructs that the following string needs to be added to the LRU string list.
 
-Payload: none  
+Payload: `none`  
 Applies to: `String`, `List`
 
 Notes:
-1. Once the list is full, items are discarded from the beginning
-2. If applied to a String Reference (type `0x81`), associated string is moved to the top of the LRU list
+1. LRU can have *at most* `512` items. Once the list is full, items are discarded from the beginning.
+3. `0x8C` can **not** be applied to a String Reference (`0x81`)
+4. Encoder should avoid adding the same string to an LRU list twice
 
 #### `0x8F` Muon Format Signature/Magic
 
