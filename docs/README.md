@@ -109,7 +109,7 @@ Applies to: usually only appears at the beginning of file/stream, once. In case 
 
 Can be used to align the following value in memory, or as stream keep-alive signal.
 
-Payload: none  
+Payload: zero or more `0xFF` bytes  
 Applies to: anything
 
 ---
