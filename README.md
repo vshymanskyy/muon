@@ -12,7 +12,7 @@ Signature/Magic:    optional, 8F B5 30 31 ["�µ01"] @ 0x0
 
 Muon has some interesting  properties (see [**presentation**](https://bit.ly/muon-present) and [**docs**](./docs/README.md)):
 - Every null-terminated `UTF8` string is at the same time a valid `muon` object
-- Gaps in the `UTF8` encoding space are used to encode things like `[` `]` `{` `}` etc.
+- Gaps in the `UTF8` encoding space (`code units`) are used to encode things like `[` `]` `{` `}` etc.
 - Muon is **self-describing and schemaless**, just like `JSON` (unlike `Protobuf` and `FlatBuffers`)
 - **Compact** (~10..50% smaller than `JSON`). On par or outperforms `CBOR`, `MsgPack`, `UBJSON`
 - **Unlimited** size of objects and values
