@@ -17,7 +17,7 @@
 #### String
 
 Regular strings are encoded in `UTF8`, null-terminated and without any prefix.  
-`0x81` is a reference to a string in an LRU list, counting from top.  
+`0x81` is a `Unsigned LEB128`-encoded index of a string in an LRU list, counting from top.  
 Fixed-length strings are encoded using a `size` tag (`0x8B`) followed by a `UTF8` string (**not** null-terminated in this case).  
 Useful for encoding:
 - long strings (>=512 bytes)
@@ -27,7 +27,7 @@ Useful for encoding:
 
 `0xA0..0xA9` - single-digit integers (for short encoding)  
 `0xB0..0xB7` - typed integers (Little-Endian)  
-`0xBB` - LEB128 encoded integers
+`0xBB` - Signed LEB128-encoded integers
 
 #### Float
 
@@ -46,7 +46,7 @@ Useful for encoding:
 
 #### TypedArray
 
-`0x84` - `TypedArray`  
+`0x84` - `TypedArray`. `count` is encoded as `Unsigned LEB128`  
 `0x85` - chunked `TypedArray`. the `count`+`values` sequence is repeated until a zero-length chunk
 
 #### List
@@ -77,7 +77,7 @@ Specifies size of the following structure in **elements**.
 This tag can optionally be added to enable parser optimizations.
 When applied to `String`, this tag indicates the count of unicode characters (not length in bytes).
 
-Payload: `LEB128`  
+Payload: `Unsigned LEB128`  
 Applies to: `Dict`, `List`, `String`
 
 #### `0x8B` Size
@@ -85,7 +85,7 @@ Applies to: `Dict`, `List`, `String`
 Specifies size of the following structure in **bytes** (excluding any tags applied to it).  
 This tag can optionally be added to enable optimized document scanning.
 
-Payload: `LEB128`  
+Payload: `Unsigned LEB128`  
 Applies to: `String`, `Dict`, `List`
 
 #### `0x8C` Referenced String
@@ -138,7 +138,7 @@ For creating a deterministic Muon, follow the following rules:
 
 - **Integer:**
   - `0..9` must use special encoding (`0xA0..0xA9`)
-  - LEB128 encoding (`0xBB`) is used for all other standalone integers
+  - Signed LEB128 encoding (`0xBB`) is used for all other standalone integers
 - **Float:**
   - `NaN`, `-Inf`, `+Inf` must be encoded using special encoding (`0xAD..0xAF`)
   - float64 (`0xBA`) format is used in all other cases
